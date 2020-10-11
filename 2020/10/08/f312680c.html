@@ -1,0 +1,544 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MySQL中的锁 | 楠枫</title><meta name="keywords" content="MySQL,锁"><meta name="author" content="楠枫"><meta name="copyright" content="楠枫"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="MySQL中的锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL中的锁">
+<meta property="og:url" content="https://longhujing.github.io/2020/10/08/f312680c.html">
+<meta property="og:site_name" content="楠枫">
+<meta property="og:description" content="MySQL中的锁">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png">
+<meta property="article:published_time" content="2020-10-08T14:04:11.000Z">
+<meta property="article:modified_time" content="2020-10-11T14:44:08.240Z">
+<meta property="article:author" content="楠枫">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="锁">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png"><link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007011027.ico"><link rel="canonical" href="https://longhujing.github.io/2020/10/08/f312680c.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="2mKW6DRTtPiHuxKWzKYmIhFA5e9t0m5KRhsU5I8oV4k"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-180135822-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-180135822-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.2.0',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: 楠枫","link":"链接: ","source":"来源: 楠枫","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: true
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-10-11 22:44:08'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {
+  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }
+})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">5</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">5</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">4</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E9%94%81-%E6%8E%92%E4%BB%96%E9%94%81"><span class="toc-number">1.</span> <span class="toc-text">共享锁&#x2F;排他锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%8C%E9%94%81"><span class="toc-number">2.</span> <span class="toc-text">行锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%84%8F%E5%90%91%E9%94%81"><span class="toc-number">3.</span> <span class="toc-text">意向锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%B4%E9%9A%99%E9%94%81"><span class="toc-number">4.</span> <span class="toc-text">间隙锁</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%B4%E9%9A%99%E9%94%81%E6%B5%8B%E8%AF%95"><span class="toc-number">4.1.</span> <span class="toc-text">间隙锁测试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87"><span class="toc-number">4.1.1.</span> <span class="toc-text">前期准备</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A3%E5%BC%8F%E5%BC%80%E5%A7%8B"><span class="toc-number">4.2.</span> <span class="toc-text">正式开始</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%89%E7%85%A7%E4%B8%BB%E9%94%AE%E7%B4%A2%E5%BC%95%E5%8A%A0%E9%97%B4%E9%9A%99%E9%94%81"><span class="toc-number">4.2.1.</span> <span class="toc-text">按照主键索引加间隙锁</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%89%E7%85%A7%E4%B8%BB%E9%94%AE%E7%B4%A2%E5%BC%95%E8%8C%83%E5%9B%B4%E5%8A%A0%E9%97%B4%E9%9A%99%E9%94%81"><span class="toc-number">4.2.2.</span> <span class="toc-text">按照主键索引范围加间隙锁</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%81%E4%BD%8F%E4%B8%8D%E5%AD%98%E5%9C%A8%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">4.2.3.</span> <span class="toc-text">锁住不存在的数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%89%E7%85%A7%E9%9D%9E%E4%B8%BB%E9%94%AE%E7%B4%A2%E5%BC%95%E5%8A%A0%E9%97%B4%E9%9A%99%E9%94%81"><span class="toc-number">4.2.4.</span> <span class="toc-text">按照非主键索引加间隙锁</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A4%E6%96%AD%E9%97%B4%E9%9A%99%E9%94%81%E7%9A%84%E8%8C%83%E5%9B%B4"><span class="toc-number">4.3.</span> <span class="toc-text">判断间隙锁的范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%B4%E9%9A%99%E9%94%81%E6%80%BB%E7%BB%93"><span class="toc-number">4.4.</span> <span class="toc-text">间隙锁总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%B4%E9%94%AE%E9%94%81"><span class="toc-number">5.</span> <span class="toc-text">临键锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%92%E5%85%A5%E6%84%8F%E5%90%91%E9%94%81"><span class="toc-number">6.</span> <span class="toc-text">插入意向锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%A2%9E%E9%94%81"><span class="toc-number">7.</span> <span class="toc-text">自增锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">8.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">楠枫</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">MySQL中的锁</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-10-08T14:04:11.000Z" title="发表于 2020-10-08 22:04:11">2020-10-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-10-11T14:44:08.240Z" title="更新于 2020-10-11 22:44:08">2020-10-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL/">MySQL</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h2 id="共享锁-排他锁"><a href="#共享锁-排他锁" class="headerlink" title="共享锁/排他锁"></a>共享锁/排他锁</h2><p>共享锁也称为读锁，一个事务对某一行记录加了共享锁的情况下， 其它的事务也可以对这一行记录加共享锁，但是不可以加排他锁。</p>
+<p>排他锁也称为写锁，一个事务对某一行加了排他锁的情况下，其他的事务不可以对这一行再加读锁或者写锁。</p>
+<p>在查询时加上<code>IN SHARE MODE</code>可以获取共享锁，加上<code>LOCK FOR UPDATE</code>可以获取排他锁，需要注意的是，UPDATE、INSERT等语句会自动加上排他锁。</p>
+<h2 id="行锁"><a href="#行锁" class="headerlink" title="行锁"></a>行锁</h2><p>在MySQL官网上关于行锁有这么一段话</p>
+<blockquote><p>Record locks always lock index records, even if a table is defined with no indexes. For such cases, <code>InnoDB</code> creates a hidden clustered index and uses this index for record locking</p>
+</blockquote>
+
+<p>意思是，行锁一定是通过索引加上的，MySQL本身并没有实现行锁的方式，行锁是由存储引擎实现的，因此有的存储引擎支持行锁（例如InnoDB），有的不支持（例如MyISAM），行锁的一个优势是粒度小，并发高，缺点是实现复杂，开销大。</p>
+<h2 id="意向锁"><a href="#意向锁" class="headerlink" title="意向锁"></a>意向锁</h2><p>在MySQL中会有这么一种情况，事务A对表T加了行锁，然后事务B对表T加了表锁。此时会出现一个驳论：事务A加了行锁的这一行仅允许事务A进行修改，事务B加了表锁，可以对表中的任意行进行修改。意向锁的目的就是为了让行锁和表锁共存。</p>
+<p>当事务A要给某一行加行锁时，首先会给事务A获取一个该表的意向排他锁，然后才能够获取到这一行的行锁，当B事务要加表锁的时候，由于此时表上已经有了意向排他锁了，因此事务B加锁失败，被阻塞了。其整个过程是这样的：</p>
+<table>
+<thead>
+<tr>
+<th>事务A</th>
+<th>事务B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>begin;</td>
+<td></td>
+</tr>
+<tr>
+<td>SELECT … FOR UPDATE;<br />获取到意向排他锁（IX）、获取到排他锁（X）</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>LOCK TABLES ….;<br />阻塞，等待锁释放</td>
+</tr>
+<tr>
+<td>commit;</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>获取表锁成功</td>
+</tr>
+</tbody></table>
+<p>意向锁和其他锁的兼容情况：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>X</th>
+<th>IX</th>
+<th>S</th>
+<th>IS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>X</td>
+<td>冲突</td>
+<td>冲突</td>
+<td>冲突</td>
+<td>冲突</td>
+</tr>
+<tr>
+<td>IX</td>
+<td>冲突</td>
+<td>兼容</td>
+<td>冲突</td>
+<td>兼容</td>
+</tr>
+<tr>
+<td>S</td>
+<td>冲突</td>
+<td>冲突</td>
+<td>兼容</td>
+<td>兼容</td>
+</tr>
+<tr>
+<td>IS</td>
+<td>冲突</td>
+<td>兼容</td>
+<td>兼容</td>
+<td>兼容</td>
+</tr>
+</tbody></table>
+<div class="note info simple"><p>需要注意的是，意向锁一定是表级锁</p>
+</div>
+
+<h2 id="间隙锁"><a href="#间隙锁" class="headerlink" title="间隙锁"></a>间隙锁</h2><p>MySQL对间隙锁的定义是这样的：</p>
+<blockquote><p>A gap lock is a lock on a gap between index records, or a lock on the gap before the first or after the last index record. For example, <code>SELECT c1 FROM t WHERE c1 BETWEEN 10 and 20 FOR UPDATE;</code> prevents other transactions from inserting a value of <code>15</code> into column <code>t.c1</code>, whether or not there was already any such value in the column, because the gaps between all existing values in the range are locked.</p>
+</blockquote>
+
+<p>这段话说明：</p>
+<ol>
+<li>间隙锁一定是一个开区间</li>
+<li>间隙锁会防止其它事务插入间隙区间内的值</li>
+</ol>
+<p>另一段说明是这样的：</p>
+<blockquote><p>Gap locks in <code>InnoDB</code> are “purely inhibitive”, which means that their only purpose is to prevent other transactions from inserting to the gap. Gap locks can co-exist. A gap lock taken by one transaction does not prevent another transaction from taking a gap lock on the same gap. There is no difference between shared and exclusive gap locks. They do not conflict with each other, and they perform the same function.</p>
+</blockquote>
+
+<p>这段话的意思是，不同的事务同一个间隙锁并不会冲突，甚至有包含关系也没事。</p>
+<p>还有一段说明是这样的：</p>
+<blockquote><p>There are also other effects of using the <a target="_blank" rel="noopener external nofollow noreferrer" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html#isolevel_read-committed"><code>READ COMMITTED</code></a> isolation level. Record locks for nonmatching rows are released after MySQL has evaluated the <code>WHERE</code> condition. For <code>UPDATE</code> statements, <code>InnoDB</code> does a “semi-consistent” read, such that it returns the latest committed version to MySQL so that MySQL can determine whether the row matches the <code>WHERE</code> condition of the <a target="_blank" rel="noopener external nofollow noreferrer" href="https://dev.mysql.com/doc/refman/8.0/en/update.html"><code>UPDATE</code></a>.</p>
+</blockquote>
+
+<p>这段话的意思是，在低于或等于读已提交的隔离级别下，间隙锁是无效的，因为这种隔离级别总会读取到最新的数据。</p>
+<p>综上所述：</p>
+<ol>
+<li>间隙锁锁定的是一个开区间</li>
+<li>其他事务不可以向间隙锁区间内插入值</li>
+<li>多个事务可以获取同一个间隙锁</li>
+<li>间隙锁只在可重复读的情况下生效（串行化没有必要了）</li>
+</ol>
+<h3 id="间隙锁测试"><a href="#间隙锁测试" class="headerlink" title="间隙锁测试"></a>间隙锁测试</h3><h4 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`t_lock_test`</span> (</span><br><span class="line">  <span class="string">`a`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`b`</span> <span class="built_in">varchar</span>(<span class="number">32</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`a`</span>),</span><br><span class="line">  <span class="keyword">KEY</span> <span class="string">`idx_b`</span> (<span class="string">`b`</span>)</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8mb4 <span class="keyword">COLLATE</span>=utf8mb4_0900_ai_ci</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">0</span>, <span class="string">&#x27;a&#x27;</span>), (<span class="number">3</span>, <span class="string">&#x27;c&#x27;</span>), (<span class="number">5</span>, <span class="string">&#x27;d&#x27;</span>), (<span class="number">6</span>, <span class="string">&#x27;g&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sql&gt; SELECT * FROM t_lock_test;</span><br><span class="line">+<span class="comment">---+---+</span></span><br><span class="line">| a | b |</span><br><span class="line">+<span class="comment">---+---+</span></span><br><span class="line">| 0 | a |</span><br><span class="line">| 3 | c |</span><br><span class="line">| 5 | d |</span><br><span class="line">| 6 | g |</span><br><span class="line">+<span class="comment">---+---+</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="正式开始"><a href="#正式开始" class="headerlink" title="正式开始"></a>正式开始</h3><h4 id="按照主键索引加间隙锁"><a href="#按照主键索引加间隙锁" class="headerlink" title="按照主键索引加间隙锁"></a>按照主键索引加间隙锁</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- session1</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t_lock_test <span class="keyword">WHERE</span> a = <span class="number">3</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- session2</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="string">&#x27;c&#x27;</span>); <span class="comment">-- 成功</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="按照主键索引范围加间隙锁"><a href="#按照主键索引范围加间隙锁" class="headerlink" title="按照主键索引范围加间隙锁"></a>按照主键索引范围加间隙锁</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- session1</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t_lock_test <span class="keyword">WHERE</span> a <span class="keyword">BETWEEN</span> <span class="number">3</span> <span class="keyword">AND</span> <span class="number">5</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- session2</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">2</span>, <span class="string">&#x27;a&#x27;</span>); <span class="comment">-- 失败</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="string">&#x27;d&#x27;</span>); <span class="comment">-- 失败</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">7</span>, <span class="string">&#x27;h&#x27;</span>); <span class="comment">-- 成功</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="锁住不存在的数据"><a href="#锁住不存在的数据" class="headerlink" title="锁住不存在的数据"></a>锁住不存在的数据</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- session1</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t_lock_test <span class="keyword">WHERE</span> a = <span class="number">2</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- session2</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="string">&#x27;m&#x27;</span>); <span class="comment">-- 失败</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">7</span>, <span class="string">&#x27;h&#x27;</span>); <span class="comment">-- 成功</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="按照非主键索引加间隙锁"><a href="#按照非主键索引加间隙锁" class="headerlink" title="按照非主键索引加间隙锁"></a>按照非主键索引加间隙锁</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- session1</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t_lock_test <span class="keyword">WHERE</span> b = <span class="string">&#x27;c&#x27;</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- session2</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="string">&#x27;a&#x27;</span>); <span class="comment">-- 失败</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">7</span>, <span class="string">&#x27;d&#x27;</span>); <span class="comment">-- 成功</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_lock_test <span class="keyword">VALUES</span> (<span class="number">2</span>, <span class="string">&#x27;b&#x27;</span>); <span class="comment">-- 失败</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="判断间隙锁的范围"><a href="#判断间隙锁的范围" class="headerlink" title="判断间隙锁的范围"></a>判断间隙锁的范围</h3><p>从上述例子中，不难看出间隙锁的范围，以按照为主键索引加间隙锁为例</p>
+<p>其范围区间可以划分为</p>
+<p><code>(-∞, a) -- (a, c) -- (c, d)</code></p>
+<p>由于非聚簇索引的特性，如果非聚簇索引相同的话，就会按照主键索引进行排序，因此实际上根据索引结构来划分的话，其锁定的区间应该是这样的</p>
+<p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201011214945.png"></p>
+<p>在这个范围内插入值都会被锁定</p>
+<h3 id="间隙锁总结"><a href="#间隙锁总结" class="headerlink" title="间隙锁总结"></a>间隙锁总结</h3><p>从上述的几个例子中不难看出间隙锁的几个特性：</p>
+<ol>
+<li>按照主键索引不不会加间隙锁</li>
+<li>按照主键索引范围或者锁住不存在的值的时候才会加间隙锁</li>
+<li>按照非主键索引一定会加间隙锁</li>
+<li>还有一点没有在测试中展现，主键索引和唯一索引的效果是一样的</li>
+</ol>
+<h2 id="临键锁"><a href="#临键锁" class="headerlink" title="临键锁"></a>临键锁</h2><p>MySQL对临键锁的定义是这样的</p>
+<blockquote><p>A next-key lock is a combination of a record lock on the index record and a gap lock on the gap before the index record.</p>
+</blockquote>
+
+<p>大致的意思就是，临键锁是行锁和间隙锁的一种组合，临键锁不仅要锁住索引行，还要锁住范围区间，可以看作是一个特殊的间隙锁</p>
+<p>MySQL对临键锁还有一个比较重要的描述</p>
+<blockquote><p>By default, <code>InnoDB</code> operates in <code>REPEATABLE READ</code> transaction isolation level. In this case, <code>InnoDB</code> uses next-key locks for searches and index scans, which prevents phantom rows </p>
+</blockquote>
+
+<p>InnoDB在可重复读这种隔离级别下，是通过临键锁来进行搜索和索引扫描的，这样的一个好处是可以在一定程度上防止幻读的出现。防止幻读的原理很简单，因为锁的是一个区间，如果要在这个区间里面插入值，那么是会阻塞的，而之所以说是在一定程度上，那是因为首先需要加锁，如果采用的是普通的<code>SELECT</code>而不是<code>SELECT ... IN SHARE MODE</code>或者<code>SELECT ... FOR UPDATE</code>，那么MySQL采用的还是快照读，并不会加锁。</p>
+<h2 id="插入意向锁"><a href="#插入意向锁" class="headerlink" title="插入意向锁"></a>插入意向锁</h2><p>MySQL对插入意向锁的描述是这样的：</p>
+<blockquote><p>An insert intention lock is a type of gap lock set by <a target="_blank" rel="noopener external nofollow noreferrer" href="https://dev.mysql.com/doc/refman/8.0/en/insert.html"><code>INSERT</code></a> operations prior to row insertion. This lock signals the intent to insert in such a way that multiple transactions inserting into the same index gap need not wait for each other if they are not inserting at the same position within the gap. Suppose that there are index records with values of 4 and 7. Separate transactions that attempt to insert values of 5 and 6, respectively, each lock the gap between 4 and 7 with insert intention locks prior to obtaining the exclusive lock on the inserted row, but do not block each other because the rows are nonconflicting.</p>
+</blockquote>
+
+<p>这段话的大意是这样的：插入意向锁是一种<code>间隙锁</code>，插入意向锁的目的是在多个事务并发插入的时候，有可能这些事务插入的不是同一个地方，为了避免互相等待而弄出来的东西。</p>
+<p>总结归纳一下插入意向锁：</p>
+<ol>
+<li>是一个间隙锁</li>
+<li>和间隙锁不同的地方是，插入意向锁锁定的区间是一条记录，而不是一个范围</li>
+<li>插入意向锁的目的是为了提升并发插入的效率</li>
+</ol>
+<h2 id="自增锁"><a href="#自增锁" class="headerlink" title="自增锁"></a>自增锁</h2><p>还是先来一段MySQL官方的描述</p>
+<blockquote><p>An <code>AUTO-INC</code> lock is a special table-level lock taken by transactions inserting into tables with <code>AUTO_INCREMENT</code> columns. In the simplest case, if one transaction is inserting values into the table, any other transactions must wait to do their own inserts into that table, so that rows inserted by the first transaction receive consecutive primary key values.</p>
+</blockquote>
+
+<p>MySQL数据库里面字段实可以设置自增的，这些自增的字段在并发的情况下保证不会出现数据安全问题，全靠自增锁维持，在往自增字段里面插入值的时候，会加一个自增锁，这个锁是<span style="color:red;">表锁</span>，所以其它的事务在插入的时候，只能等待前面那个获取到自增锁的事务弄好了才能往里面插入。这就是为什么使用MySQL的主键自增策略会有瓶颈问题的原因所在。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a target="_blank" rel="noopener external nofollow noreferrer" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-locking.html">MySQL官网</a></li>
+<li><a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/Saintyyu/article/details/91269087">MySQL常见的七种锁详细介绍</a></li>
+</ol>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined" rel="external nofollow noreferrer">楠枫</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://longhujing.github.io/2020/10/08/f312680c.html">https://longhujing.github.io/2020/10/08/f312680c.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://longhujing.github.io" target="_blank">楠枫</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/%E9%94%81/">锁</a></div><div class="post_share"><div class="social-share" data-image="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2020/10/08/1ceae895.html"><img class="next-cover" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">MySQL JOIN执行细节</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/10/08/1ceae895.html" title="MySQL JOIN执行细节"><img class="cover" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-08</div><div class="title">MySQL JOIN执行细节</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></article></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 楠枫</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    $.getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js', () => {
+      pangu.spacingElementById('content-inner')
+    })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguFn)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const initData = {
+      el: '#vcomment',
+      appId: 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+      appKey: '872ccchCi5VbFWO3yXmoRMOk',
+      placeholder: 'biu~biu~biu~',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: true,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else $.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js', initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.querySelector('#vcomment'),loadValine)
+  else setTimeout(() => loadValine(), 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.17.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+    content = content.replace(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png|webp)/g, '') // remove image link
+    content = content.replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi, '') // remove url
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon 
+    let defaultIcon = ''
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    for (let i = 0; i < array.length; i++) {
+      result += '<div class=\'aside-list-item\'>'
+
+      if (true) {
+        result += `<a href='${array[i].url}' class="thumbnail"><img src='${getIcon(array[i].avatar, array[i].mail)}' alt='${array[i].nick}'></a>`
+      }
+
+      result += `<div class='content'>
+      <a class='comment' href='${array[i].url}'>${array[i].content}</a>
+      <div class='name'><span>${array[i].nick}</span><time> / ${btf.diffDate(array[i].date, true)}</time></div>
+      </div></div>`
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getValineData = () => {
+      let serverURL = ''
+      if (false) {
+        serverURL = ''
+      } else {
+        serverURL = 'https://OkELnRgB.api.lncldglobal.com'
+      }
+
+    var settings = {
+      "url": `${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,
+      "method": "GET",
+      "timeout": 0,
+      "headers": {
+        "X-LC-Id": 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+        "X-LC-Key": '872ccchCi5VbFWO3yXmoRMOk',
+        "Content-Type": "application/json"
+      },
+    }
+
+    $.ajax(settings).done((response) => {
+      var valineArray = []
+      response.results.forEach((e)=>{
+        valineArray.push({
+          'avatar': e.QQAvatar,
+          'content': changeContent(e.comment),
+          'mail': e.mail,
+          'nick': e.nick,
+          'url': e.url,
+          'date': e.createdAt,
+        })
+      })
+      
+      saveToLocal.set('leancloud-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+      generateHtml(valineArray)
+
+    }).fail(()=>{
+      const $dom = document.querySelector('#card-newest-comments .aside-list')
+      $dom.innerHTML= "无法获取资料，请确认相关配置是否正确"
+    })
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('leancloud-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getValineData()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config_change',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  $('script[data-pjax]').each(function () {
+    $(this).parent().append($(this).remove())
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-180135822-1', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  $(window).off('scroll')
+
+  //reset readmode
+  $('body').hasClass('read-mode') && $('body').removeClass('read-mode')
+
+})</script></div></body></html>
