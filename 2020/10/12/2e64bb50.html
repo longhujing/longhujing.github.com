@@ -1,0 +1,427 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>INSERT INTO SELECT...加锁 | 楠枫</title><meta name="keywords" content="INSERT INTO SELECT, 锁, MySQL"><meta name="author" content="楠枫"><meta name="copyright" content="楠枫"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="INSERT INTO SELECT...加锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="INSERT INTO SELECT...加锁">
+<meta property="og:url" content="https://longhujing.github.io/2020/10/12/2e64bb50.html">
+<meta property="og:site_name" content="楠枫">
+<meta property="og:description" content="INSERT INTO SELECT...加锁">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png">
+<meta property="article:published_time" content="2020-10-12T14:33:24.000Z">
+<meta property="article:modified_time" content="2020-10-13T15:46:58.504Z">
+<meta property="article:author" content="楠枫">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="锁">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png"><link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007011027.ico"><link rel="canonical" href="https://longhujing.github.io/2020/10/12/2e64bb50.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="2mKW6DRTtPiHuxKWzKYmIhFA5e9t0m5KRhsU5I8oV4k"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-180135822-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-180135822-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.2.0',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: 楠枫","link":"链接: ","source":"来源: 楠枫","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: true
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-10-13 23:46:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {
+  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }
+})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">6</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">5</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">4</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#INSERT-INTO-SELECT%E2%80%A6"><span class="toc-number">2.</span> <span class="toc-text">INSERT INTO SELECT…</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF"><span class="toc-number">2.1.</span> <span class="toc-text">场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">2.2.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF%E6%A8%A1%E6%8B%9F"><span class="toc-number">2.3.</span> <span class="toc-text">场景模拟</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87"><span class="toc-number">2.3.1.</span> <span class="toc-text">数据准备</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81"><span class="toc-number">2.3.2.</span> <span class="toc-text">验证</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.4.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">3.</span> <span class="toc-text">参考文章</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">楠枫</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">INSERT INTO SELECT...加锁</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-10-12T14:33:24.000Z" title="发表于 2020-10-12 22:33:24">2020-10-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-10-13T15:46:58.504Z" title="更新于 2020-10-13 23:46:58">2020-10-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL/">MySQL</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>说出来可能不信，今晚上因为洗数据的问题，经理对我发出灵魂拷问。</p>
+<blockquote><p>为什么要采用<code>rename</code>表的方式来做？你不知道<code>rename</code>是会锁表的吗？这段时间服务不可用怎么办？为什么不用<code>INSERT INTO SELECT...</code>来做？</p>
+</blockquote>
+
+<p>当时被问得心里比较慌，依稀记得看过一篇文章写到了<code>INSERT INTO SELECT...</code>如果不采用索引也会有锁表的问题，而这个洗数据的过程的WHERE条件里面就没有用到索引，只是当时没有想起来，被问的一愣一愣的，有些语无伦次，太丢脸了😂</p>
+<p>当时考虑的还是比较简单，经理是希望我可以想的更有深度一些，考虑的更全面一点，意识还是要培养起来。</p>
+<h2 id="INSERT-INTO-SELECT…"><a href="#INSERT-INTO-SELECT…" class="headerlink" title="INSERT INTO SELECT…"></a>INSERT INTO SELECT…</h2><p>之前看过的文章是《<a target="_blank" rel="noopener external nofollow noreferrer" href="https://juejin.im/post/6844904086173646862">Insert into select语句引发的生产事故</a>》，看这篇文章也可以理解<code>INSERT INTO SELECT...</code>加锁的问题。</p>
+<h3 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h3><blockquote>
+<p>由于代码问题，第三方有一个循环插入数据到表<code>dirty_table</code>里面，导致短时间内这个表就达到了几百万的数据量，关键是还没有建索引，然后查询特别慢，一次耗时5秒左右！于是下定决心要改变这种情况。</p>
+<p>好不容易代码修复完了、有效的数据也迁移到<code>new_table</code>里面去了，接下来就是改改表名就好了，然后就…</p>
+</blockquote>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>目前我需要执行的SQL语句是</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RENAME</span> <span class="keyword">TABLE</span> dirty_table <span class="keyword">TO</span> dirty_table_old;</span><br><span class="line"><span class="keyword">RENAME</span> <span class="keyword">TABLE</span> new_table <span class="keyword">TO</span> dirty_table;</span><br><span class="line"><span class="comment">-- dirty_table不能直接删了，在new_table里面的数据并不是全部的，dirty_table此时还在不断的接收新的数据进来，需要做增量更新</span></span><br></pre></td></tr></table></figure>
+
+<p>这种做法毫无疑问在RENAME期间整个和<code>dirty_table</code>相关的业务都要受到影响，经理希望找一种能够不影响业务的方法来做到数据的切换，经理的想法是这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> dirty_table <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> new_table <span class="keyword">WHERE</span> ...;</span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> dirty_table <span class="keyword">WHERE</span> ...;</span><br></pre></td></tr></table></figure>
+
+<p>看上去好像没啥问题，甚至甩我几条街，但是脑子里依稀记得这么搞是有问题的。</p>
+<p>由于WHERE条件里面的列没有加上索引，因此在整个过程中，会对<code>dirty_table</code>加表锁，对<code>new_table</code>逐行加锁，最终的效果和RENAME其实感觉都差不多了…</p>
+<h3 id="场景模拟"><a href="#场景模拟" class="headerlink" title="场景模拟"></a>场景模拟</h3><p>结论是有了，但是还需要实际操作来验证。</p>
+<h4 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`dirty_table`</span> (</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  <span class="string">`c1`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`c2`</span> <span class="built_in">varchar</span>(<span class="number">32</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>)</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8mb4 <span class="keyword">COLLATE</span>=utf8mb4_0900_ai_ci;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`new_table`</span> (</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  <span class="string">`c1`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`c2`</span> <span class="built_in">varchar</span>(<span class="number">32</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>)</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8mb4 <span class="keyword">COLLATE</span>=utf8mb4_0900_ai_ci;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"></span><br><span class="line">chars = &#x27;abcdefghijklmnopqrstuvwxyz&#x27;</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="keyword">open</span>(<span class="string">&#x27;insert_into_select_simulation.sql&#x27;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> <span class="keyword">file</span>:</span><br><span class="line">    file.write(<span class="string">&#x27;INSERT INTO dirty_table (`c1`, `c2`) VALUES &#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="keyword">open</span>(<span class="string">&#x27;insert_into_select_simulation.sql&#x27;</span>, <span class="string">&#x27;a&#x27;</span>) <span class="keyword">as</span> <span class="keyword">file</span>:</span><br><span class="line">    <span class="keyword">max</span> = <span class="number">1000000</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="keyword">range</span>(<span class="number">1</span>, <span class="keyword">max</span>):</span><br><span class="line">        file.write(<span class="string">&quot;(&#x27;&#123;0&#125;&#x27;, &#x27;&#123;1&#125;&#x27;),&quot;</span>.format(i, chars[i % <span class="keyword">len</span>(chars)]))</span><br><span class="line">    file.write(<span class="string">&quot;(&#x27;&#123;0&#125;&#x27;, &#x27;&#123;1&#125;&#x27;);&quot;</span>.format(<span class="keyword">max</span>, chars[<span class="keyword">max</span> % <span class="keyword">len</span>(chars)]))</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="keyword">open</span>(<span class="string">&#x27;insert.sql&#x27;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> <span class="keyword">file</span>:</span><br><span class="line">    <span class="keyword">start</span> = <span class="number">1000001</span></span><br><span class="line">    <span class="keyword">end</span> = <span class="number">1001001</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="keyword">range</span>(<span class="keyword">start</span>, <span class="keyword">end</span>):</span><br><span class="line">        file.write(<span class="string">&quot;INSERT INTO dirty_table (`id`, `c1`, `c2`) VALUES (&#x27;&#123;0&#125;&#x27;, &#x27;&#123;1&#125;&#x27;, &#x27;&#123;2&#125;&#x27;);\n&quot;</span>.format(i, i, chars[i % <span class="keyword">len</span>(chars)]))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 数据转移脚本</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> dirty_table <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> dirty_table <span class="keyword">WHERE</span> c1 &gt; <span class="number">1000</span>;</span><br><span class="line"><span class="comment">-- 同时执行insert.sql里面的脚本，模拟此时有用户操作的情况</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>先运行<code>INSERT INTO ... SELECT ...</code>语句，然后再运行<code>INSERT INTO ...</code>语句，模拟此时有用户在使用。</p>
+<p>然后你会发现并没有如预期中那样被阻塞😂</p>
+<p>一开始我也很懵逼，甚至有点慌（毕竟我后面还信誓旦旦去找我经理说这玩意也会锁表的😂）</p>
+<p>然后开始翻资料，在<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.percona.com/blog/2006/07/12/insert-into-select-performance-with-innodb-tables/">INSERT INTO … SELECT Performance with Innodb tables.</a>这篇文章里介绍了为什么会加锁。这篇文章的大致意思是：一般的<code>SELECT</code>预计是不会加锁的，除非显示的申明<code>IN SHARE MODE</code>或者<code>FOR UPDATE</code>，但是<code>INSERT INTO table1 SELECT * FORM table2</code>是个特例，因为这个时候会锁住表<code>table2</code>，其目的是为了防止在<code>SELECT</code>的时候有其他的事务更新数据导致复制的时候出现不一致的问题。不过这篇资料有点老了，是2008年的，而且写的时候用的好像是MySQL 5.1😂，不过道理还是对的。</p>
+<p>然而还是没有找到为什么这里没有加锁的原因，于是又开始在Google的海洋里遨游，终于给我找到了<code>Stackover Flow</code>里面的一个问题：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://stackoverflow.com/questions/2640898/how-to-improve-insert-into-select-locking-behavior">How to improve INSERT INTO … SELECT locking behavior</a>，这位大佬的问题大致意思是他们公司有个<code>INSERT INTO ... SELECT ... </code>，然后定时的跑，他发现执行这个东西的时候其它查询涉及到的表的时候耗时很长，问问该怎么提升性能。下面的一个回答给我启发：</p>
+<p>可以设置<code>binlog_format = ROWS</code></p>
+<p>莫非我的这个设置不是ROWS？</p>
+<p>赶紧查查</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">GLOBAL</span> <span class="keyword">VARIABLES</span> <span class="keyword">LIKE</span> <span class="string">&#x27;%binlog_format%&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201013231111.png"></p>
+<p>果然如此，赶紧修改（这里还有查阅binlog_format的资料，但是由于篇幅问题就不展开讨论了，后续会专门对binlog_format进行深入的分析了解）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> binlog_format = <span class="keyword">STATEMENT</span>;</span><br></pre></td></tr></table></figure>
+
+<p>我以为这样就万事大吉了，然而测试的时候还是没有出现预期中的情况，看来还有一些我没注意到的地方，继续Google😶</p>
+<p>在<a target="_blank" rel="noopener external nofollow noreferrer" href="https://cloud.tencent.com/developer/article/1639457">insert语句的加锁情况分析</a>中简单介绍了<code>innodb_autoinc_lock_mode</code>的三种模式，原来还需要修改这个东西。和<code>binlog_format</code>不同，这个需要到<code>my.cnf</code>里面修改，然后重新启动MySQL才能生效。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">VARIABLES</span> <span class="keyword">LIKE</span> <span class="string">&#x27;%innodb_autoinc_lock_mode%&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>到此，终于得到我预期的效果了，真的是太难了~</p>
+<p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201013224411.jpg"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>从验证的过程中来看，MySQL（我的版本是8.0+的）默认的<code>binlog_format</code>、<code>innodb_autoinc_lock_mode</code>设置，可以保证在执行的时候不会锁全表，影响其它业务的正常运行，因此建议还是使用<code>INSERT INTO ... SELECT ... </code>而不是<code>RENAME</code></p>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ol>
+<li><a target="_blank" rel="noopener external nofollow noreferrer" href="https://juejin.im/post/6844904086173646862">Insert into select语句引发的生产事故</a></li>
+<li><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.percona.com/blog/2006/07/12/insert-into-select-performance-with-innodb-tables/">INSERT INTO … SELECT Performance with Innodb tables.</a></li>
+<li><a target="_blank" rel="noopener external nofollow noreferrer" href="https://stackoverflow.com/questions/2640898/how-to-improve-insert-into-select-locking-behavior">How to improve INSERT INTO … SELECT locking behavior</a></li>
+<li><a target="_blank" rel="noopener external nofollow noreferrer" href="https://cloud.tencent.com/developer/article/1639457">insert语句的加锁情况分析</a></li>
+</ol>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined" rel="external nofollow noreferrer">楠枫</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://longhujing.github.io/2020/10/12/2e64bb50.html">https://longhujing.github.io/2020/10/12/2e64bb50.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://longhujing.github.io" target="_blank">楠枫</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/%E9%94%81/">锁</a></div><div class="post_share"><div class="social-share" data-image="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2020/10/08/f312680c.html"><img class="next-cover" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">MySQL中的锁</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/10/08/f312680c.html" title="MySQL中的锁"><img class="cover" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-08</div><div class="title">MySQL中的锁</div></div></a></div><div><a href="/2020/10/08/1ceae895.html" title="MySQL JOIN执行细节"><img class="cover" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-08</div><div class="title">MySQL JOIN执行细节</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></article></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 楠枫</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    $.getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js', () => {
+      pangu.spacingElementById('content-inner')
+    })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguFn)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const initData = {
+      el: '#vcomment',
+      appId: 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+      appKey: '872ccchCi5VbFWO3yXmoRMOk',
+      placeholder: 'biu~biu~biu~',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: true,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else $.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js', initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.querySelector('#vcomment'),loadValine)
+  else setTimeout(() => loadValine(), 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.17.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+    content = content.replace(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png|webp)/g, '') // remove image link
+    content = content.replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi, '') // remove url
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon 
+    let defaultIcon = ''
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    for (let i = 0; i < array.length; i++) {
+      result += '<div class=\'aside-list-item\'>'
+
+      if (true) {
+        result += `<a href='${array[i].url}' class="thumbnail"><img src='${getIcon(array[i].avatar, array[i].mail)}' alt='${array[i].nick}'></a>`
+      }
+
+      result += `<div class='content'>
+      <a class='comment' href='${array[i].url}'>${array[i].content}</a>
+      <div class='name'><span>${array[i].nick}</span><time> / ${btf.diffDate(array[i].date, true)}</time></div>
+      </div></div>`
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getValineData = () => {
+      let serverURL = ''
+      if (false) {
+        serverURL = ''
+      } else {
+        serverURL = 'https://OkELnRgB.api.lncldglobal.com'
+      }
+
+    var settings = {
+      "url": `${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,
+      "method": "GET",
+      "timeout": 0,
+      "headers": {
+        "X-LC-Id": 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+        "X-LC-Key": '872ccchCi5VbFWO3yXmoRMOk',
+        "Content-Type": "application/json"
+      },
+    }
+
+    $.ajax(settings).done((response) => {
+      var valineArray = []
+      response.results.forEach((e)=>{
+        valineArray.push({
+          'avatar': e.QQAvatar,
+          'content': changeContent(e.comment),
+          'mail': e.mail,
+          'nick': e.nick,
+          'url': e.url,
+          'date': e.createdAt,
+        })
+      })
+      
+      saveToLocal.set('leancloud-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+      generateHtml(valineArray)
+
+    }).fail(()=>{
+      const $dom = document.querySelector('#card-newest-comments .aside-list')
+      $dom.innerHTML= "无法获取资料，请确认相关配置是否正确"
+    })
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('leancloud-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getValineData()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config_change',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  $('script[data-pjax]').each(function () {
+    $(this).parent().append($(this).remove())
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-180135822-1', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  $(window).off('scroll')
+
+  //reset readmode
+  $('body').hasClass('read-mode') && $('body').removeClass('read-mode')
+
+})</script></div></body></html>
