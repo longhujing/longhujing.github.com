@@ -5794,4 +5794,5 @@ blockquote.pullquote.right {
 .leetcode a.fancybox {
   width: 8%;
   cursor: default;
+  display: inline-block;
 }
