@@ -2,16 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://longhujing.github.io/2020/11/08/6b05edee.html</loc>
+    <loc>https://longhujing.github.io/2020/10/08/af355a99.html</loc>
     
     <lastmod>2020-11-08</lastmod>
     
   </url>
   
   <url>
-    <loc>https://longhujing.github.io/2020/10/08/af355a99.html</loc>
+    <loc>https://longhujing.github.io/2020/11/08/6b05edee.html</loc>
     
-    <lastmod>2020-11-07</lastmod>
+    <lastmod>2020-11-08</lastmod>
     
   </url>
   
@@ -158,13 +158,6 @@
   </url>
   
   <url>
-    <loc>https://longhujing.github.io/tags/%E7%B4%A2%E5%BC%95/</loc>
-    <lastmod>2020-11-08</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://longhujing.github.io/tags/%E4%BC%98%E5%8C%96/</loc>
     <lastmod>2020-11-08</lastmod>
     <changefreq>daily</changefreq>
@@ -173,6 +166,13 @@
   
   <url>
     <loc>https://longhujing.github.io/tags/%E7%AE%97%E6%B3%95/</loc>
+    <lastmod>2020-11-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://longhujing.github.io/tags/%E7%B4%A2%E5%BC%95/</loc>
     <lastmod>2020-11-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
