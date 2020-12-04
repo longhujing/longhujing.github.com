@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>MySQL提高Update效率</title>
+      <link href="2020/11/30/77ad6375.html"/>
+      <url>2020/11/30/77ad6375.html</url>
+      
+        <content type="html"><![CDATA[<p>业务中有很多的场景需要执行<code>update</code>操作，例如更新账户余额、更新库存啊balabala…</p><p>MySQL的<code>update</code>语句大致要经过以下几个步骤</p><ol><li>通过存储引擎获取到对应的行数据</li><li>将行数据加载到MySQL服务层</li><li>在服务中对行数据进行修改</li><li>将修改后的行数据通过存储引擎写回磁盘</li></ol><p>可以看出<code>update</code>的过程其实挺繁琐的，而且<code>update</code>还会伴随加锁的问题，同样会成为系统的瓶颈，比如像下面这条SQL</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t_item (</span><br><span class="line">    item_id <span class="built_in">VARCHAR</span> ( <span class="number">32</span> ) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">    total <span class="built_in">BIGINT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0</span> </span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">UPDATE</span> t_warehouse <span class="keyword">SET</span> total = total + <span class="number">10</span> <span class="keyword">WHERE</span> item_id = <span class="string">&#x27;12345&#x27;</span>;</span><br></pre></td></tr></table></figure><p>假设在<code>item_id</code>上面加了锁，那么显然<code>update</code>这个语句是加行锁的，关键是如果多个请求都来执行这条语句的话，那么就会变成串行的执行顺序了…这样的并发其实很低。</p><p>为了提升并发能力，可以给表添加一个<code>slot</code>的概念，比如对于上面的库存表就可以设置10个<code>slot</code>，然后更新的时候这样做</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t_item (</span><br><span class="line">    item_id <span class="built_in">VARCHAR</span> ( <span class="number">32</span> ) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">    total <span class="built_in">BIGINT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>,</span><br><span class="line">    slot <span class="built_in">INT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_warehouse (item_id, total, slot) <span class="keyword">VALUES</span> (<span class="string">&#x27;12345&#x27;</span>, <span class="number">10</span>, <span class="keyword">ROUND</span>(<span class="keyword">RAND</span>() * <span class="number">9</span>) + <span class="number">1</span>) <span class="keyword">ON</span> <span class="keyword">DUPLICATE</span> <span class="keyword">KEY</span> <span class="keyword">UPDATE</span> total = total + <span class="number">10</span>;</span><br></pre></td></tr></table></figure><p>这样做其实就是把原来的<code>update</code>操作转换为<code>insert</code>操作，而且可以支持最多10的并发量（可以调整）</p><p>接下来就是测试的时间了，代码已上传至<a href="https://github.com/longhujing/study_test/tree/master/mysql-update">Github</a>，有兴趣可以<code>clone</code>下来耍耍</p><p><strong>普通模式</strong></p><p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201205010728.jpg"></p><p><strong>SLOT模式</strong></p><p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201205010801.jpg"></p><p>可以看到，在并发为1000的时候，普通模式的吞吐量只有<code>347</code>，而SLOT模式可以达到<code>783</code>而且还没有异常，很明显SLOT模式的并发度是远高于普通模式的。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> MySQL </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> MySQL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>MySQL Order By与limit复用出现重复数据</title>
       <link href="2020/11/15/9d35a9dd.html"/>
       <url>2020/11/15/9d35a9dd.html</url>
