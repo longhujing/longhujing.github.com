@@ -5838,3 +5838,6 @@ blockquote.pullquote.right {
   cursor: default;
   display: inline-block;
 }
+.btn-beautify i {
+  margin-right: 10px;
+}
