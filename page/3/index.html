@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>楠枫 - nanfeng</title><meta name="author" content="楠枫"><meta name="copyright" content="楠枫"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="南风未起，念你成疾">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>楠枫 - nanfeng</title><meta name="author" content="楠枫"><meta name="copyright" content="楠枫"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="南风未起，念你成疾">
 <meta property="og:type" content="website">
 <meta property="og:title" content="楠枫">
 <meta property="og:url" content="https://longhujing.github.io/page/3/index.html">
@@ -12,7 +12,7 @@
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'UA-180135822-1');
-</script><script>var GLOBAL_CONFIG = { 
+</script><script>const GLOBAL_CONFIG = { 
   root: '/',
   algolia: undefined,
   localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
@@ -53,55 +53,12 @@ gtag('config', 'UA-180135822-1');
   isPhotoFigcaption: false,
   islazyload: true,
   isanchor: true
-};
-
-var saveToLocal = {
-  set: function setWithExpiry(key, value, ttl) {
-    const now = new Date()
-    const expiryDay = ttl * 86400000
-    const item = {
-      value: value,
-      expiry: now.getTime() + expiryDay,
-    }
-    localStorage.setItem(key, JSON.stringify(item))
-  },
-
-  get: function getWithExpiry(key) {
-    const itemStr = localStorage.getItem(key)
-
-    if (!itemStr) {
-      return undefined
-    }
-    const item = JSON.parse(itemStr)
-    const now = new Date()
-
-    if (now.getTime() > item.expiry) {
-      localStorage.removeItem(key)
-      return undefined
-    }
-    return item.value
-  }
-}
-
-// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
-const getScript = url => new Promise((resolve, reject) => {
-  const script = document.createElement('script')
-  script.src = url
-  script.async = true
-  script.onerror = reject
-  script.onload = script.onreadystatechange = function() {
-    const loadState = this.readyState
-    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-    script.onload = script.onreadystatechange = null
-    resolve()
-  }
-  document.head.appendChild(script)
-})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
   isPost: false,
   isHome: true,
   isHighlightShrink: false,
   isToc: false,
-  postUpdate: '2021-01-30 22:16:34'
+  postUpdate: '2021-01-31 11:09:31'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -114,66 +71,83 @@ const getScript = url => new Promise((resolve, reject) => {
   #post-meta time {
     display: inline !important
   }
-</style></noscript><script>(function () {  window.activateDarkMode = function () {
-    document.documentElement.setAttribute('data-theme', 'dark')
-    if (document.querySelector('meta[name="theme-color"]') !== null) {
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
-    }
-  }
-  window.activateLightMode = function () {
-    document.documentElement.setAttribute('data-theme', 'light')
-   if (document.querySelector('meta[name="theme-color"]') !== null) {
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
-    }
-  }
-  const autoChangeMode = 'false'
-  const t = saveToLocal.get('theme')
-  if (autoChangeMode === '1') {
-    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
-    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
-    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
-    if (t === undefined) {
-      if (isLightMode) activateLightMode()
-      else if (isDarkMode) activateDarkMode()
-      else if (isNotSpecified || hasNoSupport) {
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
         const now = new Date()
-        const hour = now.getHours()
-        const isNight = hour <= 6 || hour >= 18
-        isNight ? activateDarkMode() : activateLightMode()
-      }
-      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
-        if (saveToLocal.get('theme') === undefined) {
-          e.matches ? activateDarkMode() : activateLightMode()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
         }
-      })
-    } else if (t === 'light') activateLightMode()
-    else activateDarkMode()
-  } else if (autoChangeMode === '2') {
-    const now = new Date()
-    const hour = now.getHours()
-    const isNight = hour <= 6 || hour >= 18
-    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
-    else if (t === 'light') activateLightMode()
-    else activateDarkMode()
-  } else {
-    if (t === 'dark') activateDarkMode()
-    else if (t === 'light') activateLightMode()
-  }const asideStatus = saveToLocal.get('aside-status')
-if (asideStatus !== undefined) {
-   if (asideStatus === 'hide') {
-     document.documentElement.classList.add('hide-aside')
-   } else {
-     document.documentElement.classList.remove('hide-aside')
-   }
-}})()</script><meta name="referrer" content="no-referrer-when-downgrade" /><meta name="baidu-site-verification" content="code-MRYTs2s4ta" /><meta name="generator" content="Hexo 5.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">楠枫</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="site-info"><h1 id="site-title">楠枫</h1><div id="site-subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="https://github.com/longhujing" rel="external nofollow noreferrer" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lhj8023@outlook.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/10/08/f312680c.html" title="MySQL中的锁">     <img class="post_bg" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL中的锁"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/f312680c.html" title="MySQL中的锁">MySQL中的锁</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-08T14:04:11.000Z" title="发表于 2020-10-08 22:04:11">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/MySQL/">MySQL</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag article-meta__icon"></i><a class="article-meta__tags" href="/tags/MySQL/">MySQL</a><span class="article-meta__link">•</span><a class="article-meta__tags" href="/tags/%E9%94%81/">锁</a></span></div><div class="content">共享锁/排他锁共享锁也称为读锁，一个事务对某一行记录加了共享锁的情况下， 其它的事务也可以对这一行记录加共享锁，但是不可以加排他锁。
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="referrer" content="no-referrer-when-downgrade" /><meta name="baidu-site-verification" content="code-MRYTs2s4ta" /><meta name="generator" content="Hexo 5.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header" style="background-image: url('https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">楠枫</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="site-info"><h1 id="site-title">楠枫</h1><div id="site_social_icons"><a class="social-icon" href="https://github.com/longhujing" rel="external nofollow noreferrer" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lhj8023@outlook.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/10/08/f312680c.html" title="MySQL中的锁">     <img class="post_bg" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL中的锁"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/f312680c.html" title="MySQL中的锁">MySQL中的锁</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-08T14:04:11.000Z" title="发表于 2020-10-08 22:04:11">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL/">MySQL</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/MySQL/">MySQL</a><span class="article-meta__link">•</span><a class="article-meta__tags" href="/tags/%E9%94%81/">锁</a></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-comments"></i><a href="/2020/10/08/f312680c.html#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2020/10/08/f312680c.html" itemprop="commentCount"></span></a><span class="article-meta-label"> 条评论</span></span></div><div class="content">共享锁/排他锁共享锁也称为读锁，一个事务对某一行记录加了共享锁的情况下， 其它的事务也可以对这一行记录加共享锁，但是不可以加排他锁。
 排他锁也称为写锁，一个事务对某一行加了排他锁的情况下，其他的事务不可以对这一行再加读锁或者写锁。
 在查询时加上IN SHARE MODE可以获取共享锁，加上LOCK FOR UPDATE可以获取排他锁，需要注意的是，UPDATE、INSERT等语句会自动加上排他锁。
 行锁在MySQL官网上关于行锁有这么一段话
 Record locks always lock index records, even if a table is defined with no indexes. For such cases, InnoDB creates a hidden clustered index and uses this index for record locking
 
 
-意思是，行锁一定是通过索引加上的，MySQL本身并没有实现行锁的方式，行锁是由存储引擎实现的，因此有的存储引擎支持行锁（例如InnoDB），有的不支持（例如MyISAM），行锁的一个优势是粒度 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/10/08/1ceae895.html" title="MySQL JOIN执行细节">     <img class="post_bg" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL JOIN执行细节"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/1ceae895.html" title="MySQL JOIN执行细节">MySQL JOIN执行细节</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-08T03:20:43.000Z" title="发表于 2020-10-08 11:20:43">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/MySQL/">MySQL</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag article-meta__icon"></i><a class="article-meta__tags" href="/tags/MySQL/">MySQL</a></span></div><div class="content">前言偶然间看到这一篇博客《Mysql - JOIN详解》，其中有一部分是对联表过程的描述，这段描述看完以后感觉怪怪的，如下:
+意思是，行锁一定是通过索引加上的，MySQL本身并没有实现行锁的方式，行锁是由存储引擎实现的，因此有的存储引擎支持行锁（例如InnoDB），有的不支持（例如MyISAM），行锁的一个优势是粒度 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/10/08/1ceae895.html" title="MySQL JOIN执行细节">     <img class="post_bg" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL JOIN执行细节"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/1ceae895.html" title="MySQL JOIN执行细节">MySQL JOIN执行细节</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-08T03:20:43.000Z" title="发表于 2020-10-08 11:20:43">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL/">MySQL</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/MySQL/">MySQL</a></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-comments"></i><a href="/2020/10/08/1ceae895.html#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2020/10/08/1ceae895.html" itemprop="commentCount"></span></a><span class="article-meta-label"> 条评论</span></span></div><div class="content">前言偶然间看到这一篇博客《Mysql - JOIN详解》，其中有一部分是对联表过程的描述，这段描述看完以后感觉怪怪的，如下:
 
 如果两个表的数据量都在百万级别，那么照这个说法，先来一次笛卡尔积，得到的vt1表将是十万亿+级别的，这直接就可以把内存搞炸了吧……
 之后看了其它的博客和官方文档以后，JOIN是通过两种算法Nested-Loop Join和Block Nested-Loop Join实现的
@@ -184,7 +158,7 @@ Nested-Loop Join当ON条件使用索引时，采用的是Nested-Loop Join算法�
 
 根据条件t_student.stu_id = &#39;1&#39;从t_student中获取对应的主键
 
-根据上一步获取 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/10/08/af355a99.html" title="LeetCode刷题">     <img class="post_bg" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201008015400.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LeetCode刷题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/af355a99.html" title="LeetCode刷题">LeetCode刷题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-07T17:07:51.000Z" title="发表于 2020-10-08 01:07:51">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/LeetCode/">LeetCode</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag article-meta__icon"></i><a class="article-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a><span class="article-meta__link">•</span><a class="article-meta__tags" href="/tags/LeetCode/">LeetCode</a></span></div><div class="content">0001 两数之和
+根据上一步获取 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/10/08/af355a99.html" title="LeetCode刷题">     <img class="post_bg" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201008015400.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LeetCode刷题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/af355a99.html" title="LeetCode刷题">LeetCode刷题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-07T17:07:51.000Z" title="发表于 2020-10-08 01:07:51">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/LeetCode/">LeetCode</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a><span class="article-meta__link">•</span><a class="article-meta__tags" href="/tags/LeetCode/">LeetCode</a></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-comments"></i><a href="/2020/10/08/af355a99.html#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2020/10/08/af355a99.html" itemprop="commentCount"></span></a><span class="article-meta-label"> 条评论</span></span></div><div class="content">0001 两数之和
     
     
 
@@ -192,26 +166,30 @@ Nested-Loop Join当ON条件使用索引时，采用的是Nested-Loop Join算法�
 
 你可以假设每种输入只会对应一个答案。但是，数组中同一个元素不能使用两遍。
 解法1解法2最简单的方法就是两层循环遍历，直到找到符合条件的组合
-123456789101112131415public int[] twoSum(int[] nums, int target) &#123;    if (nums == null || nums.length &lt;= 1) &#123;        return null;    &#125;    for (int i = 0; i &lt; nums.length; i++) &#123;        int n1 = nums[i];        int n2 = target - n1;        for (int j = i + 1; j &lt; nums.length; j++) &#123;            if (nums[j] == n2 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/10/08/9f76ab7a.html" title="雪花算法实现">     <img class="post_bg" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201008003150.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="雪花算法实现"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/9f76ab7a.html" title="雪花算法实现">雪花算法实现</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-07T16:24:40.000Z" title="发表于 2020-10-08 00:24:40">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%AE%97%E6%B3%95/">算法</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag article-meta__icon"></i><a class="article-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></span></div><div class="content">算法原理雪花算法生成的id总共由64位组成，其每个部分如图所示：
+123456789101112131415public int[] twoSum(int[] nums, int target) &#123;    if (nums == null || nums.length &lt;= 1) &#123;        return null;    &#125;    for (int i = 0; i &lt; nums.length; i++) &#123;        int n1 = nums[i];        int n2 = target - n1;        for (int j = i + 1; j &lt; nums.length; j++) &#123;            if (nums[j] == n2 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/10/08/9f76ab7a.html" title="雪花算法实现">     <img class="post_bg" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201008003150.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="雪花算法实现"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/9f76ab7a.html" title="雪花算法实现">雪花算法实现</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-07T16:24:40.000Z" title="发表于 2020-10-08 00:24:40">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E7%AE%97%E6%B3%95/">算法</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-comments"></i><a href="/2020/10/08/9f76ab7a.html#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2020/10/08/9f76ab7a.html" itemprop="commentCount"></span></a><span class="article-meta-label"> 条评论</span></span></div><div class="content">算法原理雪花算法生成的id总共由64位组成，其每个部分如图所示：
 
 1bit: 二进制中最高位是符号位，用于确定数值的正负，0代表正数，1代表负数。一般而言id都是正数，所以最高位这边的0一般是不会动的。
 41bit: 接下来的41bit用于记录时间戳（毫秒级），41位可以表示$2^{41} - 1$个数字，换算成年就是$(2^{41} - 1) / (1000 * 60 * 60 * 60 * 24 * 365) = 69$年
 10bit: 接下来的10bit用于区分不同的机器，因为系统可能不止一台机器，每一台机器生成id的时间戳有可能相同，因此需要标记不同的机器。10bit分5bit的centerId和5bit的workerId。
 12bit: 序列号是用来记录同一毫秒内产生的不同的id。一台机器有可能在同一毫秒内会产生多个id。
-算法实现123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/10/08/84d1ebba.html" title="System.currentTimeMillis优化">     <img class="post_bg" data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="System.currentTimeMillis优化"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/84d1ebba.html" title="System.currentTimeMillis优化">System.currentTimeMillis优化</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-07T16:18:40.000Z" title="发表于 2020-10-08 00:18:40">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Java/">Java</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag article-meta__icon"></i><a class="article-meta__tags" href="/tags/%E4%BC%98%E5%8C%96/">优化</a></span></div><div class="content">前言以前开发的时候经常使用System.currentTimeMillis来获取当前的时间戳，刚好解决雪花算法生成重复ID的时候看到了这个的优化，好奇之下对这个优化及进行了探索。
+算法实现123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/10/08/84d1ebba.html" title="System.currentTimeMillis优化">     <img class="post_bg" data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="System.currentTimeMillis优化"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/08/84d1ebba.html" title="System.currentTimeMillis优化">System.currentTimeMillis优化</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-07T16:18:40.000Z" title="发表于 2020-10-08 00:18:40">2020-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Java/">Java</a></span><span class="article-meta tags"><span class="article-meta__separator">|</span><i class="fas fa-tag"></i><a class="article-meta__tags" href="/tags/%E4%BC%98%E5%8C%96/">优化</a></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-comments"></i><a href="/2020/10/08/84d1ebba.html#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2020/10/08/84d1ebba.html" itemprop="commentCount"></span></a><span class="article-meta-label"> 条评论</span></span></div><div class="content">前言以前开发的时候经常使用System.currentTimeMillis来获取当前的时间戳，刚好解决雪花算法生成重复ID的时候看到了这个的优化，好奇之下对这个优化及进行了探索。
 System.currentTimeMillis为什么慢为什么System.currentTimeMillis会耗时呢？有一篇文章对这个做了解释。简而言之就是：调用底层的获取时间戳的方法需要从用户态切换到内核态，而且这个获取时间戳的方法还受到Linux计时器的影响（Linux系统中只有一个计时器）如果并发访问的情况下，会出现资源争抢激烈的情况。
 Linux计时器分为两种：HPET和TSC，HPET性能较差，因为HPET通过串行来处理并发请求，TSC性能稍好一点，会有专门的寄存器记录时间，缺点是稳定性不好，因为TSC是存硬件的计时器，频率可变。
 在了解了System.currentTimeMillis为什么慢以后，接下来看看它到底有多慢。
-12345678910111213141516public class Main &#123;    public static void main(String[] arg ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/2/"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">楠枫</div><div class="author-info__description">南风未起，念你成疾</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/longhujing"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/longhujing" rel="external nofollow noreferrer" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lhj8023@outlook.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">南风未起，念你成疾</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/01/21/ef2ef3c.html" title="从ReentrantLock分析AQS原理"><img data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210121233750.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="从ReentrantLock分析AQS原理"/></a><div class="content"><a class="title" href="/2021/01/21/ef2ef3c.html" title="从ReentrantLock分析AQS原理">从ReentrantLock分析AQS原理</a><time datetime="2021-01-20T17:06:04.000Z" title="发表于 2021-01-21 01:06:04">2021-01-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/10/d64754c3.html" title="内存可见性问题"><img data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="内存可见性问题"/></a><div class="content"><a class="title" href="/2021/01/10/d64754c3.html" title="内存可见性问题">内存可见性问题</a><time datetime="2021-01-10T15:06:05.000Z" title="发表于 2021-01-10 23:06:05">2021-01-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/05/6e774499.html" title="synchronized实现原理"><img data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210110003237.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="synchronized实现原理"/></a><div class="content"><a class="title" href="/2021/01/05/6e774499.html" title="synchronized实现原理">synchronized实现原理</a><time datetime="2021-01-05T15:34:11.000Z" title="发表于 2021-01-05 23:34:11">2021-01-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/24/d9a0e3ef.html" title="RocketMQ集群搭建(双主双从)"><img data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201224020844.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RocketMQ集群搭建(双主双从)"/></a><div class="content"><a class="title" href="/2020/12/24/d9a0e3ef.html" title="RocketMQ集群搭建(双主双从)">RocketMQ集群搭建(双主双从)</a><time datetime="2020-12-23T16:42:27.000Z" title="发表于 2020-12-24 00:42:27">2020-12-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/3e803f5.html" title="为什么使用消息队列"><img data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为什么使用消息队列"/></a><div class="content"><a class="title" href="/2020/12/15/3e803f5.html" title="为什么使用消息队列">为什么使用消息队列</a><time datetime="2020-12-14T16:01:05.000Z" title="发表于 2020-12-15 00:01:05">2020-12-15</time></div></div></div></div><div class="card-widget" id="card-newest-comments"><div class="item-headline"><i class="fas fa-bolt"></i><span>最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div><div class="card-widget card-categories"><div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div><ul class="card-category-list" id="aside-cat-list">
+12345678910111213141516public class Main &#123;    public static void main(String[] arg ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/2/"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">楠枫</div><div class="author-info__description">南风未起，念你成疾</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/longhujing"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/longhujing" rel="external nofollow noreferrer" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lhj8023@outlook.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">南风未起，念你成疾</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/01/21/ef2ef3c.html" title="从ReentrantLock分析AQS原理"><img data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210121233750.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="从ReentrantLock分析AQS原理"/></a><div class="content"><a class="title" href="/2021/01/21/ef2ef3c.html" title="从ReentrantLock分析AQS原理">从ReentrantLock分析AQS原理</a><time datetime="2021-01-20T17:06:04.000Z" title="发表于 2021-01-21 01:06:04">2021-01-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/10/d64754c3.html" title="内存可见性问题"><img data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="内存可见性问题"/></a><div class="content"><a class="title" href="/2021/01/10/d64754c3.html" title="内存可见性问题">内存可见性问题</a><time datetime="2021-01-10T15:06:05.000Z" title="发表于 2021-01-10 23:06:05">2021-01-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/05/6e774499.html" title="synchronized实现原理"><img data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210110003237.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="synchronized实现原理"/></a><div class="content"><a class="title" href="/2021/01/05/6e774499.html" title="synchronized实现原理">synchronized实现原理</a><time datetime="2021-01-05T15:34:11.000Z" title="发表于 2021-01-05 23:34:11">2021-01-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/24/d9a0e3ef.html" title="RocketMQ集群搭建(双主双从)"><img data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201224020844.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RocketMQ集群搭建(双主双从)"/></a><div class="content"><a class="title" href="/2020/12/24/d9a0e3ef.html" title="RocketMQ集群搭建(双主双从)">RocketMQ集群搭建(双主双从)</a><time datetime="2020-12-23T16:42:27.000Z" title="发表于 2020-12-24 00:42:27">2020-12-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/3e803f5.html" title="为什么使用消息队列"><img data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为什么使用消息队列"/></a><div class="content"><a class="title" href="/2020/12/15/3e803f5.html" title="为什么使用消息队列">为什么使用消息队列</a><time datetime="2020-12-14T16:01:05.000Z" title="发表于 2020-12-15 00:01:05">2020-12-15</time></div></div></div></div><div class="card-widget" id="card-newest-comments"><div class="item-headline"><i class="fas fa-bolt"></i><span>最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            <a class="card-more-btn" href="/categories/" title="查看更多">
+    <i class="fas fa-angle-right"></i></a>
+            </div>
+            <ul class="card-category-list" id="aside-cat-list">
             <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Git/"><span class="card-category-list-name">Git</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Java/"><span class="card-category-list-name">Java</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Kong/"><span class="card-category-list-name">Kong</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/LeetCode/"><span class="card-category-list-name">LeetCode</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/MQ/"><span class="card-category-list-name">MQ</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/MySQL/"><span class="card-category-list-name">MySQL</span><span class="card-category-list-count">8</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Redisson/"><span class="card-category-list-name">Redisson</span><span class="card-category-list-count">2</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/RocketMQ/"><span class="card-category-list-name">RocketMQ</span><span class="card-category-list-count">1</span></a></li>
-            <li class="card-category-list-item more is-center"><a class="card-category-list-link-more" href="/categories/">
-                <span>查看更多</span><i class="fas fa-angle-right"></i></a></li>
-            </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/AQS/" style="font-size: 1.1em; color: rgb(35, 149, 95)">AQS</a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 1.23em; color: rgb(188, 51, 21)">并发</a><a href="/tags/Git/" style="font-size: 1.1em; color: rgb(66, 123, 151)">Git</a><a href="/tags/GitBash/" style="font-size: 1.1em; color: rgb(120, 60, 103)">GitBash</a><a href="/tags/%E4%B8%BB%E9%A2%98/" style="font-size: 1.1em; color: rgb(66, 126, 38)">主题</a><a href="/tags/%E7%BD%91%E5%85%B3/" style="font-size: 1.1em; color: rgb(8, 184, 15)">网关</a><a href="/tags/Kong/" style="font-size: 1.1em; color: rgb(105, 0, 175)">Kong</a><a href="/tags/MySQL/" style="font-size: 1.5em; color: rgb(194, 51, 26)">MySQL</a><a href="/tags/%E9%94%81/" style="font-size: 1.37em; color: rgb(89, 144, 78)">锁</a><a href="/tags/%E7%B4%A2%E5%BC%95/" style="font-size: 1.1em; color: rgb(96, 14, 133)">索引</a><a href="/tags/Redisson/" style="font-size: 1.23em; color: rgb(172, 131, 33)">Redisson</a><a href="/tags/SpringBoot/" style="font-size: 1.37em; color: rgb(76, 121, 8)">SpringBoot</a><a href="/tags/%E5%B7%A5%E5%85%B7/" style="font-size: 1.1em; color: rgb(131, 108, 119)">工具</a><a href="/tags/Redis-Desktop-Manager/" style="font-size: 1.1em; color: rgb(74, 2, 170)">Redis Desktop Manager</a><a href="/tags/%E8%B7%A8%E5%9F%9F/" style="font-size: 1.1em; color: rgb(125, 143, 27)">跨域</a><a href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" style="font-size: 1.1em; color: rgb(191, 133, 0)">线程池</a><a href="/tags/%E4%BC%98%E5%8C%96/" style="font-size: 1.1em; color: rgb(145, 130, 88)">优化</a><a href="/tags/%E6%97%A5%E5%BF%97/" style="font-size: 1.1em; color: rgb(24, 105, 131)">日志</a><a href="/tags/logback/" style="font-size: 1.1em; color: rgb(200, 195, 161)">logback</a><a href="/tags/synchronized/" style="font-size: 1.1em; color: rgb(42, 195, 150)">synchronized</a><a href="/tags/MQ/" style="font-size: 1.1em; color: rgb(27, 168, 5)">MQ</a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 1.23em; color: rgb(178, 80, 188)">算法</a><a href="/tags/%E5%8F%AF%E8%A7%81%E6%80%A7/" style="font-size: 1.1em; color: rgb(183, 58, 19)">可见性</a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 1.1em; color: rgb(9, 173, 106)">消息队列</a><a href="/tags/RocketMQ/" style="font-size: 1.1em; color: rgb(129, 129, 3)">RocketMQ</a><a href="/tags/LeetCode/" style="font-size: 1.1em; color: rgb(31, 154, 29)">LeetCode</a></div></div><div class="card-widget card-archives"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/01/"><span class="card-archive-list-date">一月 2021</span><span class="card-archive-list-count">3</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/12/"><span class="card-archive-list-date">十二月 2020</span><span class="card-archive-list-count">9</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/11/"><span class="card-archive-list-date">十一月 2020</span><span class="card-archive-list-count">5</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/10/"><span class="card-archive-list-date">十月 2020</span><span class="card-archive-list-count">8</span></a></li></ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">25</div></div><div class="webinfo-item"><div class="item-name">已运行时间 :</div><div class="item-count" id="runtimeshow" data-publishDate="2020-10-06T16:00:00.000Z"></div></div><div class="webinfo-item"><div class="item-name">本站总字数 :</div><div class="item-count">44.2k</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2021-01-30T14:16:33.635Z"></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 楠枫</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
-  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+            </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/GitBash/" style="font-size: 1.1em; color: rgb(2, 186, 148)">GitBash</a><a href="/tags/%E4%B8%BB%E9%A2%98/" style="font-size: 1.1em; color: rgb(41, 145, 67)">主题</a><a href="/tags/MySQL/" style="font-size: 1.5em; color: rgb(149, 107, 123)">MySQL</a><a href="/tags/%E9%94%81/" style="font-size: 1.37em; color: rgb(169, 200, 138)">锁</a><a href="/tags/AQS/" style="font-size: 1.1em; color: rgb(5, 14, 166)">AQS</a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 1.23em; color: rgb(49, 167, 114)">并发</a><a href="/tags/Git/" style="font-size: 1.1em; color: rgb(179, 19, 50)">Git</a><a href="/tags/%E7%BD%91%E5%85%B3/" style="font-size: 1.1em; color: rgb(47, 120, 137)">网关</a><a href="/tags/Kong/" style="font-size: 1.1em; color: rgb(15, 107, 75)">Kong</a><a href="/tags/%E5%B7%A5%E5%85%B7/" style="font-size: 1.1em; color: rgb(36, 134, 12)">工具</a><a href="/tags/Redis-Desktop-Manager/" style="font-size: 1.1em; color: rgb(172, 101, 171)">Redis Desktop Manager</a><a href="/tags/%E7%B4%A2%E5%BC%95/" style="font-size: 1.1em; color: rgb(165, 22, 118)">索引</a><a href="/tags/Redisson/" style="font-size: 1.23em; color: rgb(13, 116, 186)">Redisson</a><a href="/tags/SpringBoot/" style="font-size: 1.37em; color: rgb(111, 161, 63)">SpringBoot</a><a href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" style="font-size: 1.1em; color: rgb(4, 77, 100)">线程池</a><a href="/tags/%E8%B7%A8%E5%9F%9F/" style="font-size: 1.1em; color: rgb(49, 68, 97)">跨域</a><a href="/tags/%E4%BC%98%E5%8C%96/" style="font-size: 1.1em; color: rgb(61, 77, 97)">优化</a><a href="/tags/%E6%97%A5%E5%BF%97/" style="font-size: 1.1em; color: rgb(172, 111, 149)">日志</a><a href="/tags/logback/" style="font-size: 1.1em; color: rgb(104, 31, 172)">logback</a><a href="/tags/synchronized/" style="font-size: 1.1em; color: rgb(66, 194, 77)">synchronized</a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 1.23em; color: rgb(182, 27, 136)">算法</a><a href="/tags/MQ/" style="font-size: 1.1em; color: rgb(140, 173, 31)">MQ</a><a href="/tags/%E5%8F%AF%E8%A7%81%E6%80%A7/" style="font-size: 1.1em; color: rgb(155, 168, 126)">可见性</a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 1.1em; color: rgb(25, 56, 45)">消息队列</a><a href="/tags/RocketMQ/" style="font-size: 1.1em; color: rgb(17, 97, 132)">RocketMQ</a><a href="/tags/LeetCode/" style="font-size: 1.1em; color: rgb(86, 105, 172)">LeetCode</a></div></div><div class="card-widget card-archives"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/01/"><span class="card-archive-list-date">一月 2021</span><span class="card-archive-list-count">3</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/12/"><span class="card-archive-list-date">十二月 2020</span><span class="card-archive-list-count">9</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/11/"><span class="card-archive-list-date">十一月 2020</span><span class="card-archive-list-count">5</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/10/"><span class="card-archive-list-date">十月 2020</span><span class="card-archive-list-count">8</span></a></li></ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">25</div></div><div class="webinfo-item"><div class="item-name">已运行时间 :</div><div class="item-count" id="runtimeshow" data-publishDate="2020-10-06T16:00:00.000Z"></div></div><div class="webinfo-item"><div class="item-name">本站总字数 :</div><div class="item-count">44.2k</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2021-01-31T03:09:31.469Z"></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 楠枫</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
   else {
     getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
       .then(() => {
-        pangu.spacingElementById('content-inner')
+        pangu.autoSpacingPage()
       })
   }
 }
@@ -235,13 +213,31 @@ document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/j
 
   }
 }
-window.addEventListener('load',()=> {preloader.endLoading()})</script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.17.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>(() => {
+  function loadValine () {
+    function initValine () {
+      let initData = {
+        el: '#vcomment',
+        appId: 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+        appKey: '872ccchCi5VbFWO3yXmoRMOk',
+      }
+      
+      const valine = new Valine(initData)
+    }
+
+    if (typeof Valine === 'function') initValine() 
+    else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+  }
+
+  window.pjax ? loadValine() : window.addEventListener('load', loadValine)
+})()</script></div><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.17.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
   const changeContent = (content) => {
     if (content === '') return content
 
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
     content = content.replace(/<[^>]+>/g,"") // remove html tag
-    content = content.replace(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png|webp)/g, '') // remove image link
-    content = content.replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi, '') // remove url
 
     if (content.length > 150) {
       content = content.substring(0,150) + '...'
@@ -251,7 +247,6 @@ window.addEventListener('load',()=> {preloader.endLoading()})</script><div class
 
   const getIcon = (icon, mail) => {
     if (icon) return icon
-    
     let defaultIcon = '?d=monsterid'
     let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
     return iconUrl
@@ -265,16 +260,13 @@ window.addEventListener('load',()=> {preloader.endLoading()})</script><div class
         result += '<div class=\'aside-list-item\'>'
 
         if (true) {
-          let name = 'src'
-          if(true) {
-            name = 'data-lazy-src'
-          }
-          result += `<a href='${array[i].url}' class="thumbnail"><img ${name}='${getIcon(array[i].avatar, array[i].mail)}' alt='${array[i].nick}'></a>`
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
         }
 
         result += `<div class='content'>
         <a class='comment' href='${array[i].url}'>${array[i].content}</a>
-        <div class='name'><span>${array[i].nick}</span><time> / ${btf.diffDate(array[i].date, true)}</time></div>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
         </div></div>`
       }
     } else {
@@ -288,12 +280,7 @@ window.addEventListener('load',()=> {preloader.endLoading()})</script><div class
   }
 
   const getComment = () => {
-      let serverURL = ''
-      if (false) {
-        serverURL = ''
-      } else {
-        serverURL = 'https://OkELnRgB.api.lncldglobal.com'
-      }
+    const serverURL = 'https://OkELnRgB.api.lncldglobal.com'
 
     var settings = {
       "method": "GET",
@@ -309,15 +296,14 @@ window.addEventListener('load',()=> {preloader.endLoading()})</script><div class
       .then(data => {
         const valineArray = data.results.map(function (e) {
           return {
-            'avatar': e.QQAvatar,
+            'avatar': getIcon(e.QQAvatar, e.mail),
             'content': changeContent(e.comment),
-            'mail': e.mail,
             'nick': e.nick,
             'url': e.url + '#' + e.objectId,
-            'date': e.createdAt,
+            'date': e.updatedAt,
           }
         })
-        saveToLocal.set('leancloud-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
         generateHtml(valineArray)
       }).catch(e => {
         const $dom = document.querySelector('#card-newest-comments .aside-list')
@@ -327,7 +313,7 @@ window.addEventListener('load',()=> {preloader.endLoading()})</script><div class
 
   const newestCommentInit = () => {
     if (document.querySelector('#card-newest-comments .aside-list')) {
-      const data = saveToLocal.get('leancloud-newest-comments')
+      const data = saveToLocal.get('valine-newest-comments')
       if (data) {
         generateHtml(JSON.parse(data))
       } else {
@@ -344,7 +330,7 @@ POWERMODE.mobile = false;
 document.body.addEventListener('input', POWERMODE);
 </script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
   'title',
-  '#config_change',
+  '#config-diff',
   '#body-wrap',
   '#rightside-config-hide',
   '#rightside-config-show',
@@ -414,4 +400,10 @@ document.addEventListener('pjax:send', function () {
   const $bodyClassList = document.body.classList
   $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
 
-})</script></div></body></html>
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
