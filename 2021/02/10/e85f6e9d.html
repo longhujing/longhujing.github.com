@@ -1,0 +1,446 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dubbo重试+Redis连接配置问题打炸线上服务 | 楠枫</title><meta name="keywords" content="Dubbo重试, Redis, 崩溃"><meta name="author" content="楠枫"><meta name="copyright" content="楠枫"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Dubbo重试+Redis连接配置问题打炸线上服务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dubbo重试+Redis连接配置问题打炸线上服务">
+<meta property="og:url" content="https://longhujing.github.io/2021/02/10/e85f6e9d.html">
+<meta property="og:site_name" content="楠枫">
+<meta property="og:description" content="Dubbo重试+Redis连接配置问题打炸线上服务">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png">
+<meta property="article:published_time" content="2021-02-10T13:47:55.000Z">
+<meta property="article:modified_time" content="2021-02-10T17:19:11.181Z">
+<meta property="article:author" content="楠枫">
+<meta property="article:tag" content="OOM">
+<meta property="article:tag" content="延时">
+<meta property="article:tag" content="Redisson">
+<meta property="article:tag" content="MQ">
+<meta property="article:tag" content="Dubbo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png"><link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007011027.ico"><link rel="canonical" href="https://longhujing.github.io/2021/02/10/e85f6e9d"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="2mKW6DRTtPiHuxKWzKYmIhFA5e9t0m5KRhsU5I8oV4k"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-180135822-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-180135822-1');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: 楠枫","link":"链接: ","source":"来源: 楠枫","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-02-11 01:19:11'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="referrer" content="no-referrer-when-downgrade" /><meta name="baidu-site-verification" content="code-MRYTs2s4ta" /><meta name="generator" content="Hexo 5.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">29</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">31</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">楠枫</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Dubbo重试+Redis连接配置问题打炸线上服务</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-02-10T13:47:55.000Z" title="发表于 2021-02-10 21:47:55">2021-02-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-02-10T17:19:11.181Z" title="更新于 2021-02-11 01:19:11">2021-02-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/">Java</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2021/02/10/e85f6e9d.html#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2021/02/10/e85f6e9d.html" itemprop="commentCount"></span></a></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>前几天产品突然接到前端反馈说收不打考勤微信通知信息了，一看线上的服务早已OOM，GG了，保留现场后赶紧先重启服务恢复一下。</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>主要异常信息如下</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Exception: java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler in thread &quot;elastic-apm-metrics-reporter&quot;</span><br><span class="line">java.lang.reflect.InvocationTargetException</span><br><span class="line">Caused by: java.lang.OutOfMemoryError: Java heap space</span><br><span class="line">Exception in thread &quot;Abandoned connection cleanup thread&quot; java.lang.OutOfMemoryError: Java heap space</span><br><span class="line">Exception in thread &quot;MQClientFactoryScheduledThread&quot; java.lang.OutOfMemoryError: Java heap space</span><br><span class="line">Exception in thread &quot;NettyServerBoss-thread-1&quot; java.lang.OutOfMemoryError: Java heap space</span><br><span class="line">Exception in thread &quot;dubbo-remoting-client-heartbeat-thread-1&quot; java.lang.OutOfMemoryError: Java heap space</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[DubboProviderLogFilter.java:65] *********************** provider biz error, elapsed[3921715]ms, 异常源头:*********************** , 应用名: ***********************, 业务受检异常: org.redisson.client.RedisTimeoutException: Unable to get connection! Node source: NodeSource [slot=null, addr=null, redisClient=null, redirect=null, entry=MasterSlaveEntry [masterEntry=[freeSubscribeConnectionsAmount=0, freeSubscribeConnectionsCounter=49, freeConnectionsAmount=0, freeConnectionsCounter=0, freezed=false, freezeReason=null, client=[addr=redis://***********************], nodeType=MASTER, firstFail=0]]], command: (EVAL), command params: [local value = redis.call(&#x27;hget&#x27;, KEYS[1], ARGV[2]); local expireDate = 92233720368547758; if value ~..., 5, ***********************, redisson__timeout__set:&#123;***********************&#125;, redisson__idle__set:&#123;***********************&#125;, redisson__map_cache__last_access__set:&#123;***********************&#125;, &#123;***********************&#125;:redisson_options, 1612398570943, PooledUnsafeDirectByteBuf(ridx: 0, widx: 56, cap: 256)] after 1 retry attempts</span><br></pre></td></tr></table></figure>
+
+<p>其实就是两个问题</p>
+<ol>
+<li>OOM（Out Of Memory）</li>
+<li>Redis连接数耗尽</li>
+</ol>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>第一个问题显然就是创建了太多的对象了，直接把内存打炸。</p>
+<p>第二个问题主要是这边发送消息为了防止重复发送，会在Redis记录一下已经发送过的消息，连接数不够有可能是请求数太大导致的。</p>
+<p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210210225741.png"></p>
+<p>看了一下调用方的请求量，顶峰也就3000rpm，分摊到消息服务上面更是少之又少了，请求量感觉是根本不可能压垮线上服务才对啊。</p>
+<p>再看看调用这个服务的方式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@DubboReference</span></span><br><span class="line"><span class="keyword">private</span> WeChatService weChatService;</span><br></pre></td></tr></table></figure>
+
+<p>好家伙，直接是默认的重试2次，超时时间是1s，似乎发现了导致大流量的问题所在了</p>
+<p>大致的思路是这样的: <code>通知服务个别请求慢了一点导致部分接口调用触发重试 —&gt; 重试导致Redis压力增大，连接数不够用 -&gt; 进一步导致接口继续超时触发重试 -&gt; 后续调用几乎全部触发重试，请求量直接翻三倍 -&gt; 大量的Dubbo请求导致创建了太多的Handle对象 —&gt; 压垮内存，OOM</code></p>
+<p>感觉思路是没问题的，那么现在就需要验证一下我的猜想是否正确了</p>
+<h3 id="问题复现"><a href="#问题复现" class="headerlink" title="问题复现"></a>问题复现</h3><p>首先复现一下Redis连接数不够的问题，也就是<code>org.redisson.client.RedisTimeoutException: Unable to get connection!</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> class <span class="title">RedisTimeoutTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@DubboReference</span></span><br><span class="line">    <span class="keyword">private</span> WeChatService weChatService;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">300</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">                weChatService.sendMsg(...);</span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WeChatServiceImpl</span> <span class="keyword">implements</span> <span class="title">WeChatService</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendMsg</span><span class="params">(...)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="comment">// 手动延时，触发Dubbo重试</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Redis相关操作</span></span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>OK，这样就可以模拟出之前预设的环境了，测试结果如下，按照预期出现了RedisTimeoutException。</p>
+<p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210211001835.png"></p>
+<p>当然为了严谨一点，这边还需要把手动延时去掉做一个对比测试，两相对比以后才能够判断真的是因为重试导致的流量激增引发的问题。</p>
+<p>同样的，为了复现OOM的问题，添加JVM启动参数如下</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">-Xms</span>=<span class="string">50m</span></span><br><span class="line"><span class="meta">-Xmx</span>=<span class="string">50m</span></span><br></pre></td></tr></table></figure>
+
+<p>其它不变的情况下进行测试，成功出现OOM的问题。线上的问题在本地复现成功。</p>
+<h2 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h2><p>根据之前的问题分析来看</p>
+<p><code>通知服务个别请求慢了一点导致部分接口调用触发重试 —&gt; 重试导致Redis压力增大，连接数不够用 -&gt; 进一步导致接口继续超时触发重试 -&gt; 后续调用几乎全部触发重试，请求量直接翻三倍 -&gt; 大量的Dubbo请求导致创建了太多的Handle对象 —&gt; 压垮内存，OOM</code></p>
+<p>问题似乎是因为Redis超时导致的重试，然后进一步引发OOM的？那么是否可以通过取消重试以及调大Redis的连接池解决问题呢？</p>
+<p>查阅了一下资料，根据资料的描述修改了相关的配置</p>
+<ol>
+<li><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/redisson/redisson/wiki/16.-FAQ#q-i-saw-a-redistimeoutexception-what-does-it-mean-what-shall-i-do-can-redisson-team-fix-it">RedissonTimeOutException</a></li>
+<li><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.bookstack.cn/read/redisson-wiki-zh/spilt.6.2.-%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95.md">Redisson单节点配置方式</a></li>
+</ol>
+<p>在把Redis的连接池从32调到64以后，其他条件不变的情况下（Dubbo依旧保留重试，手动延时依旧存在），没有出现RedisTimeoutException以及OOM的问题，问题似乎已经得到解决，但是问题真的解决了吗？</p>
+<p>再次回顾一下问题，是因为Dubbo重试导致的流量激增，即大流量导致的创建过多的Handle导致的内存耗尽问题，也就是说，只要流量达到一定的程度，该炸的时候还是得炸，取消Dubbo重试和调大连接池只是缓解了问题，但是并没有解决。</p>
+<p>其实解决问题的办法很简单，使用MQ削峰就好了。改造架构流程如图所示</p>
+<p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210211011508.png"></p>
+<p>如此一来，通过MQ的削峰操作，即便再大的流量，也能够从容的处理。这里一个比较担心的问题就是：会不会出现消息堆积的问题？</p>
+<p>从2020年9月份的数据来看，通知服务顶峰时期是1100rpm，这边有两台机器，那么QPS就是 <code>1100 / 60 / 2 -&gt; 9</code>，而处理一个通知大部分的耗时都是在100ms左右，那么实际上是完全可以承受住这个流量的，不会出现消息堆积的问题（出现消息堆积就会导致后面的通知出现比较严重的延时，用户要求的实时性比较高），因此这一方面的顾虑也打消了。</p>
+<p>另外一点就是容错，Dubbo这边重试就是为了做容错，比如说网络问题或者像这种Redis处理失败的情况，可能是偶发的，因此需要重试一下。那么这边切换成MQ之后，而需要有一个容错的机制，而MQ消息消费失败了以后还可以重试消费，这就很完美了。</p>
+<p>最后一个比较重要的问题就是还需要有失败告警机制，一旦再出现这种问题，可以提前预警提前处理，而不是等到前端反馈了才发现问题。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined" rel="external nofollow noreferrer">楠枫</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://longhujing.github.io/2021/02/10/e85f6e9d.html">https://longhujing.github.io/2021/02/10/e85f6e9d.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://longhujing.github.io" target="_blank">楠枫</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/OOM/">OOM</a><a class="post-meta__tags" href="/tags/%E5%BB%B6%E6%97%B6/">延时</a><a class="post-meta__tags" href="/tags/Redisson/">Redisson</a><a class="post-meta__tags" href="/tags/MQ/">MQ</a><a class="post-meta__tags" href="/tags/Dubbo/">Dubbo</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/02/10/5f163ff4.html"><img class="next-cover" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201209011430.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">自定义日志打印starter</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/12/05/8b842fbe.html" title="Redisson+SpringBoot简单使用"><img class="cover" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201207003918.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-05</div><div class="title">Redisson+SpringBoot简单使用</div></div></a></div><div><a href="/2020/12/06/6dd39ea8.html" title="Redisson爬坑之RMap"><img class="cover" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201207003918.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-06</div><div class="title">Redisson爬坑之RMap</div></div></a></div><div><a href="/2020/12/15/3e803f5.html" title="为什么使用消息队列"><img class="cover" data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-15</div><div class="title">为什么使用消息队列</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">楠枫</div><div class="author-info__description">南风未起，念你成疾</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">29</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">31</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/longhujing"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/longhujing" rel="external nofollow noreferrer" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lhj8023@outlook.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">南风未起，念你成疾</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">问题描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">问题分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%A4%8D%E7%8E%B0"><span class="toc-number">2.1.</span> <span class="toc-text">问题复现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3"><span class="toc-number">3.</span> <span class="toc-text">问题解决</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/02/10/e85f6e9d.html" title="Dubbo重试+Redis连接配置问题打炸线上服务"><img data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Dubbo重试+Redis连接配置问题打炸线上服务"/></a><div class="content"><a class="title" href="/2021/02/10/e85f6e9d.html" title="Dubbo重试+Redis连接配置问题打炸线上服务">Dubbo重试+Redis连接配置问题打炸线上服务</a><time datetime="2021-02-10T13:47:55.000Z" title="发表于 2021-02-10 21:47:55">2021-02-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/10/5f163ff4.html" title="自定义日志打印starter"><img data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201209011430.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="自定义日志打印starter"/></a><div class="content"><a class="title" href="/2021/02/10/5f163ff4.html" title="自定义日志打印starter">自定义日志打印starter</a><time datetime="2021-02-10T06:17:38.000Z" title="发表于 2021-02-10 14:17:38">2021-02-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/55172f1b.html" title="二分法常见场景汇总"><img data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="二分法常见场景汇总"/></a><div class="content"><a class="title" href="/2021/02/03/55172f1b.html" title="二分法常见场景汇总">二分法常见场景汇总</a><time datetime="2021-02-02T16:05:37.000Z" title="发表于 2021-02-03 00:05:37">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/31/4d65c8e1.html" title="ParallelStream出现的高延时问题"><img data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="ParallelStream出现的高延时问题"/></a><div class="content"><a class="title" href="/2021/01/31/4d65c8e1.html" title="ParallelStream出现的高延时问题">ParallelStream出现的高延时问题</a><time datetime="2021-01-31T03:14:06.000Z" title="发表于 2021-01-31 11:14:06">2021-01-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/21/ef2ef3c.html" title="从ReentrantLock分析AQS原理"><img data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210121233750.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="从ReentrantLock分析AQS原理"/></a><div class="content"><a class="title" href="/2021/01/21/ef2ef3c.html" title="从ReentrantLock分析AQS原理">从ReentrantLock分析AQS原理</a><time datetime="2021-01-20T17:06:04.000Z" title="发表于 2021-01-21 01:06:04">2021-01-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 楠枫</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+      appKey: '872ccchCi5VbFWO3yXmoRMOk',
+      placeholder: 'biu~biu~biu~',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: true,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.17.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=monsterid'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://OkELnRgB.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+        "X-LC-Key": '872ccchCi5VbFWO3yXmoRMOk',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.innerHTML= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config-diff',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-180135822-1', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
