@@ -277,13 +277,6 @@
   </url>
   
   <url>
-    <loc>https://longhujing.github.io/tags/Git/</loc>
-    <lastmod>2021-03-02</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://longhujing.github.io/tags/GitBash/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
@@ -327,6 +320,13 @@
   
   <url>
     <loc>https://longhujing.github.io/tags/Dubbo/</loc>
+    <lastmod>2021-03-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://longhujing.github.io/tags/Git/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -403,6 +403,13 @@
   </url>
   
   <url>
+    <loc>https://longhujing.github.io/tags/%E4%BC%98%E5%8C%96/</loc>
+    <lastmod>2021-03-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://longhujing.github.io/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
@@ -410,7 +417,7 @@
   </url>
   
   <url>
-    <loc>https://longhujing.github.io/tags/%E4%BC%98%E5%8C%96/</loc>
+    <loc>https://longhujing.github.io/tags/synchronized/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -431,7 +438,7 @@
   </url>
   
   <url>
-    <loc>https://longhujing.github.io/tags/synchronized/</loc>
+    <loc>https://longhujing.github.io/tags/%E4%BA%8C%E5%88%86%E6%B3%95/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -439,13 +446,6 @@
   
   <url>
     <loc>https://longhujing.github.io/tags/%E5%8F%AF%E8%A7%81%E6%80%A7/</loc>
-    <lastmod>2021-03-02</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://longhujing.github.io/tags/%E4%BA%8C%E5%88%86%E6%B3%95/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -489,13 +489,6 @@
   </url>
   
   <url>
-    <loc>https://longhujing.github.io/categories/Git/</loc>
-    <lastmod>2021-03-02</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://longhujing.github.io/categories/%E9%9A%8F%E7%AC%94/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
@@ -504,6 +497,13 @@
   
   <url>
     <loc>https://longhujing.github.io/categories/Java/</loc>
+    <lastmod>2021-03-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://longhujing.github.io/categories/Git/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -545,6 +545,13 @@
   </url>
   
   <url>
+    <loc>https://longhujing.github.io/categories/%E9%94%81/</loc>
+    <lastmod>2021-03-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://longhujing.github.io/categories/logback/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
@@ -553,13 +560,6 @@
   
   <url>
     <loc>https://longhujing.github.io/categories/MQ/</loc>
-    <lastmod>2021-03-02</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://longhujing.github.io/categories/%E9%94%81/</loc>
     <lastmod>2021-03-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
