@@ -1,0 +1,430 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>如何为字符串设计索引 | 楠枫</title><meta name="keywords" content="MySQL, 索引, 字符串"><meta name="author" content="楠枫"><meta name="copyright" content="楠枫"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="如何为字符串设计索引">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何为字符串设计索引">
+<meta property="og:url" content="https://longhujing.github.io/2021/06/17/2152ef35.html">
+<meta property="og:site_name" content="楠枫">
+<meta property="og:description" content="如何为字符串设计索引">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png">
+<meta property="article:published_time" content="2021-06-16T16:29:09.000Z">
+<meta property="article:modified_time" content="2021-06-16T17:10:34.911Z">
+<meta property="article:author" content="楠枫">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="索引">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png"><link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007011027.ico"><link rel="canonical" href="https://longhujing.github.io/2021/06/17/2152ef35"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google_site_verification" content="2mKW6DRTtPiHuxKWzKYmIhFA5e9t0m5KRhsU5I8oV4k"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-180135822-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-180135822-1');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: 楠枫","link":"链接: ","source":"来源: 楠枫","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '如何为字符串设计索引',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-06-17 01:10:34'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="referrer" content="no-referrer-when-downgrade" /><meta name="baidu-site-verification" content="code-MRYTs2s4ta" /><meta name="generator" content="Hexo 5.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">楠枫</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">如何为字符串设计索引</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-06-16T16:29:09.000Z" title="发表于 2021-06-17 00:29:09">2021-06-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-06-16T17:10:34.911Z" title="更新于 2021-06-17 01:10:34">2021-06-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL/">MySQL</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="如何为字符串设计索引"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2021/06/17/2152ef35.html#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2021/06/17/2152ef35.html" itemprop="commentCount"></span></a></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="前缀索引"><a href="#前缀索引" class="headerlink" title="前缀索引"></a>前缀索引</h2><p>MySQL是支持字符串前缀索引的，即可以仅使用字符串的前<code>N</code>个字符做索引，而不是包含整个字符串。这样做的好处就是能够节省磁盘空间，坏处就是会导致查询效率降低。</p>
+<p>例如一个支持邮箱登录的系统可能会有如下的SQL语句</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`user`</span> <span class="keyword">WHERE</span> email = <span class="string">&#x27;zhangsan@qq.com&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>假设现在对<code>user</code>表的<code>email</code>字段加上如下的索引</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> <span class="string">`user`</span> <span class="keyword">ADD</span> <span class="keyword">INDEX</span> idx_email_prefix(email(<span class="number">5</span>));</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> <span class="string">`user`</span> <span class="keyword">ADD</span> <span class="keyword">INDEX</span> idx_email_full(email);</span><br></pre></td></tr></table></figure>
+
+<p><code>idx_email_prefix</code>的索引结构如下</p>
+<p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210617004026.png"></p>
+<p><code>idx_email_full</code>的索引结构如下</p>
+<p><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210617004323.png"></p>
+<p>如果采用<code>idx_email_full</code>索引，那么查询过程就是</p>
+<ol>
+<li>根据<code>zhangsan@qq.com</code>找到第一个匹配的索引记录<code>ID1</code></li>
+<li>根据<code>ID1</code>回表通过主键索引查询结果</li>
+<li>再找下一条数据<code>zhangsi@qq.com</code>，与<code>zhangsan@qq.com</code>不匹配，查找结束</li>
+</ol>
+<p>如果采用<code>idx_email_prefix</code>，那么查询过程就是</p>
+<ol>
+<li>根据<code>zhang</code>找到第一个匹配的记录<code>ID1</code></li>
+<li>根据<code>ID1</code>回表通过主键索引查询结果，<code>ID1</code>的<code>email</code>信息与<code>zhangsan@qq.com</code>匹配，返回结果</li>
+<li>再找下一个能跟<code>zhang</code>匹配的索引记录<code>zhangsi@qq.com</code>，获取到的id为<code>ID2</code></li>
+<li>回表查询<code>ID2</code>的记录，发现<code>email</code>与<code>zhangsan@qq.com</code>不匹配，丢弃</li>
+<li>….继续执行3、4，直到出现第一个与<code>zhang</code>不匹配的记录</li>
+</ol>
+<p>因此，通过查询过程发现，前缀索引可能会降低查询效率。</p>
+<p>但如果将前缀索引的前缀长度改成7，那么采用<code>idx_email_prefix</code>其实查一次也就结束了。因此只要定义好长度，即前缀的区分度足够好，那么就可以兼顾空间与时间效率</p>
+<p>计算区分度的方式如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 首先查看email的不同值个数</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> email) <span class="keyword">AS</span> total <span class="keyword">FROM</span> <span class="string">`user`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 接着查看不同前缀长度的不同值个数</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(email, <span class="number">4</span>)) <span class="keyword">AS</span> len_4,</span><br><span class="line">       <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(email, <span class="number">5</span>)) <span class="keyword">AS</span> len_5,</span><br><span class="line">       <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(email, <span class="number">6</span>)) <span class="keyword">AS</span> len_6,</span><br><span class="line">       <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(email, <span class="number">7</span>)) <span class="keyword">AS</span> len_7;</span><br><span class="line">       </span><br><span class="line"><span class="comment">-- 用得到的len_4, len_5, len_6, len_7除以total，得到的百分比即为区分度，选取一个能够接受的区分度的长度即可</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="前缀索引的问题"><a href="#前缀索引的问题" class="headerlink" title="前缀索引的问题"></a>前缀索引的问题</h2><p>前缀索引出了会导致可能降低查询效率外，还会有其它的问题</p>
+<h3 id="覆盖索引失效"><a href="#覆盖索引失效" class="headerlink" title="覆盖索引失效"></a>覆盖索引失效</h3><p>例如现在SQL语句改成这样</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> uid, email <span class="keyword">FROM</span> <span class="string">`user`</span> <span class="keyword">WHERE</span> email = <span class="string">&#x27;zhangsan@qq.com&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 现有的索引如下</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> <span class="string">`user`</span> <span class="keyword">ADD</span> <span class="keyword">INDEX</span> idx_email_prefix(email(<span class="number">7</span>), uid);</span><br></pre></td></tr></table></figure>
+
+<p>如果<code>email</code>上面不是前缀索引的话，那么这个SQL语句是不需要回表的，但是由于使用了前缀索引，这个索引只能说明匹配了前面的N个部分，但是具体是否真的匹配就必须回表查询出来在进行匹配才能得知，因此使用前缀索引会导致覆盖索引失效。</p>
+<h2 id="其它优化方式"><a href="#其它优化方式" class="headerlink" title="其它优化方式"></a>其它优化方式</h2><p>前缀索引的优势在于能够减少空间的消耗，通过增大前缀长度得到一个能够接受的匹配度就可以获得空间与时间的平衡，但前缀不能太长，不然就失去了价值，而某些情况下，为了达到足够的区分度，前缀就会非常长。</p>
+<p>例如需要对身份证字段加索引，身份证总共18位，前6位代表地区，然后是出生日期、顺序编码等。如果加前缀索引，如果只用前6位同一个地区的人都在一起，区分度不够高，要得到足够大区分度，可能需要14位长度，而这已经接近整个身份证的长度了，因此采用前缀索引是不合适的。</p>
+<h3 id="计算Hash值"><a href="#计算Hash值" class="headerlink" title="计算Hash值"></a>计算Hash值</h3><p>对于每一个身份证号码，可以在存入的时候通过一定的算法计算其哈希值，这样一来只需对这个哈希值（int类型4个字节）建索引即可，只要算法能够尽可能保证散列均匀，那么查询效率也很高。</p>
+<h3 id="倒序存储"><a href="#倒序存储" class="headerlink" title="倒序存储"></a>倒序存储</h3><p>既然身份证的前面几位区分度不高，那么就从尾到头进行匹配。存储的时候就采用倒序存储，建立前缀索引进行查询</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined" rel="external nofollow noreferrer">楠枫</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://longhujing.github.io/2021/06/17/2152ef35.html">https://longhujing.github.io/2021/06/17/2152ef35.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://longhujing.github.io" target="_blank">楠枫</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/%E7%B4%A2%E5%BC%95/">索引</a></div><div class="post_share"><div class="social-share" data-image="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/06/13/a10a1c6e.html"><img class="next-cover" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">如何正确修改MySQL表结构</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/10/29/90fd26f6.html" title="MySQL索引失效"><img class="cover" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-29</div><div class="title">MySQL索引失效</div></div></a></div><div><a href="/2020/10/12/2e64bb50.html" title="INSERT INTO SELECT...加锁"><img class="cover" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-12</div><div class="title">INSERT INTO SELECT...加锁</div></div></a></div><div><a href="/2020/10/08/1ceae895.html" title="MySQL JOIN执行细节"><img class="cover" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-08</div><div class="title">MySQL JOIN执行细节</div></div></a></div><div><a href="/2020/11/15/9d35a9dd.html" title="MySQL Order By与limit复用出现重复数据"><img class="cover" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-15</div><div class="title">MySQL Order By与limit复用出现重复数据</div></div></a></div><div><a href="/2020/10/18/937fe6d5.html" title="MySQL中的日志"><img class="cover" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-18</div><div class="title">MySQL中的日志</div></div></a></div><div><a href="/2020/10/08/f312680c.html" title="MySQL中的锁"><img class="cover" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-08</div><div class="title">MySQL中的锁</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007005611.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">楠枫</div><div class="author-info__description">南风未起，念你成疾</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/longhujing"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/longhujing" rel="external nofollow noreferrer" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lhj8023@outlook.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">南风未起，念你成疾</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95"><span class="toc-number">1.</span> <span class="toc-text">前缀索引</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">2.</span> <span class="toc-text">前缀索引的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="toc-number">2.1.</span> <span class="toc-text">覆盖索引失效</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E5%AE%83%E4%BC%98%E5%8C%96%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">其它优化方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97Hash%E5%80%BC"><span class="toc-number">3.1.</span> <span class="toc-text">计算Hash值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%80%92%E5%BA%8F%E5%AD%98%E5%82%A8"><span class="toc-number">3.2.</span> <span class="toc-text">倒序存储</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/06/17/2152ef35.html" title="如何为字符串设计索引"><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="如何为字符串设计索引"/></a><div class="content"><a class="title" href="/2021/06/17/2152ef35.html" title="如何为字符串设计索引">如何为字符串设计索引</a><time datetime="2021-06-16T16:29:09.000Z" title="发表于 2021-06-17 00:29:09">2021-06-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/13/a10a1c6e.html" title="如何正确修改MySQL表结构"><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="http://longhujing.gitee.io/image-bed/resources/images/install-mysql/mysql-0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="如何正确修改MySQL表结构"/></a><div class="content"><a class="title" href="/2021/06/13/a10a1c6e.html" title="如何正确修改MySQL表结构">如何正确修改MySQL表结构</a><time datetime="2021-06-13T15:34:58.000Z" title="发表于 2021-06-13 23:34:58">2021-06-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/04/12/93f68013.html" title="伪共享问题"><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="伪共享问题"/></a><div class="content"><a class="title" href="/2021/04/12/93f68013.html" title="伪共享问题">伪共享问题</a><time datetime="2021-04-12T14:48:03.000Z" title="发表于 2021-04-12 22:48:03">2021-04-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/31/bf81cb61.html" title="逃逸分析"><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://i.loli.net/2020/10/07/3yeotb1YU6k7Vgl.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="逃逸分析"/></a><div class="content"><a class="title" href="/2021/03/31/bf81cb61.html" title="逃逸分析">逃逸分析</a><time datetime="2021-03-30T16:08:43.000Z" title="发表于 2021-03-31 00:08:43">2021-03-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/07/b87cd24c.html" title="TCP粘包拆包问题"><img src= "https://cdn.jsdelivr.net/gh/longhujing/assert/img/20201007015211.gif" data-lazy-src="https://cdn.jsdelivr.net/gh/longhujing/assert/img/20210307182513.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="TCP粘包拆包问题"/></a><div class="content"><a class="title" href="/2021/03/07/b87cd24c.html" title="TCP粘包拆包问题">TCP粘包拆包问题</a><time datetime="2021-03-07T10:12:33.000Z" title="发表于 2021-03-07 18:12:33">2021-03-07</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 楠枫</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+      appKey: '872ccchCi5VbFWO3yXmoRMOk',
+      placeholder: 'biu~biu~biu~',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: true,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.17.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=monsterid'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://OkELnRgB.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'OkELnRgB1h7xAfUqyViqBNtz-gzGzoHsz',
+        "X-LC-Key": '872ccchCi5VbFWO3yXmoRMOk',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.innerHTML= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config-diff',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener toc scroll 
+  window.removeEventListener('scroll', window.tocScrollFn)
+
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', 'UA-180135822-1', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
